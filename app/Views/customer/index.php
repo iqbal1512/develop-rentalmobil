@@ -52,9 +52,8 @@
                         <i class="bi bi-pencil-fill"></i>
                       </a>
                       <a href="<?= base_url('customer/delete/' . $c['id_customer']) ?>" 
-                         class="btn btn-sm btn-outline-danger" 
-                         title="Hapus" 
-                         onclick="return confirm('Apakah Anda yakin ingin menghapus data customer ini?')">
+                         class="btn btn-sm btn-outline-danger confirm-delete" 
+                         title="Hapus">
                         <i class="bi bi-trash3-fill"></i>
                       </a>
                     </div>

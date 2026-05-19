@@ -117,17 +117,6 @@ $routes->group('pembayaran', ['filter' => 'auth'], function ($routes) {
 });
 
 // =============================================
-// PEMBAYARAN PEMBELIAN
-// =============================================
-$routes->group('pembayaran_pembelian', ['filter' => 'auth'], function ($routes) {
-    $routes->get('/',                        'PembayaranPembelian::index');
-    $routes->get('create/(:num)',            'PembayaranPembelian::create/$1');
-    $routes->post('store',                   'PembayaranPembelian::store');
-    $routes->get('detail/(:num)',            'PembayaranPembelian::detail/$1');
-    $routes->get('cetak-kwitansi/(:num)',    'PembayaranPembelian::cetakKwitansi/$1');
-});
-
-// =============================================
 // PENYERAHAN MOBIL
 // =============================================
 $routes->group('penyerahan', ['filter' => 'auth'], function ($routes) {

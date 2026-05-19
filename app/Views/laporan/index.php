@@ -3,16 +3,16 @@
 
 <div class="row">
     <div class="col-md-4">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-white text-dark">
-                <h5 class="mb-0"><i class="bi bi-funnel-fill text-info me-2"></i> Filter Laporan</h5>
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-funnel-fill" style="color: var(--primary);"></i> Filter Laporan</h5>
             </div>
             <div class="card-body">
                 <form action="<?= base_url('laporan/generate') ?>" method="post">
                     <?= csrf_field() ?>
-                    <div class="mb-3">
-                        <label class="form-label text-dark">Jenis Laporan</label>
-                        <select name="jenis_laporan" class="form-select bg-white text-dark border-light" required>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Jenis Laporan</label>
+                        <select name="jenis_laporan" class="form-select" required>
                             <option value="">-- Pilih Laporan --</option>
                             <option value="pembelian">Laporan Pembelian</option>
                             <option value="penjualan">Laporan Penjualan</option>
@@ -20,15 +20,15 @@
                             <option value="pemesanan">Laporan Pemesanan</option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label text-dark">Periode Mulai</label>
-                        <input type="date" name="periode_start_date" class="form-control bg-white text-dark border-light" required>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Periode Mulai</label>
+                        <input type="date" name="periode_start_date" class="form-control" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label text-dark">Periode Akhir</label>
-                        <input type="date" name="periode_akhir_date" class="form-control bg-white text-dark border-light" required>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Periode Akhir</label>
+                        <input type="date" name="periode_akhir_date" class="form-control" required>
                     </div>
-                    <div class="d-grid">
+                    <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-primary"><i class="bi bi-file-earmark-bar-graph"></i> Generate Laporan</button>
                     </div>
                 </form>
@@ -36,9 +36,9 @@
         </div>
     </div>
     <div class="col-md-8">
-        <div class="card shadow-sm">
-            <div class="card-header bg-white text-dark">
-                <h5 class="mb-0"><i class="bi bi-clock-history text-info me-2"></i> Riwayat Laporan Terakhir</h5>
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history" style="color: var(--primary);"></i> Riwayat Laporan Terakhir</h5>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">

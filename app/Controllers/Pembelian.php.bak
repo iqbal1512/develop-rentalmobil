@@ -50,6 +50,7 @@ class Pembelian extends Controller
             'tgl_pembelian'    => 'required|valid_date',
             'harga_beli'       => 'required',
             'jumlah_pembelian' => 'required|integer|greater_than[0]',
+            'metode_bayar'     => 'required|in_list[tunai,transfer]',
         ];
 
         if (!$this->validate($rules)) {
@@ -59,6 +60,7 @@ class Pembelian extends Controller
         $harga   = (float) str_replace([',', '.'], '', $this->request->getPost('harga_beli'));
         $jumlah  = (int)   $this->request->getPost('jumlah_pembelian');
         $total   = $this->model->hitungTotal($harga, $jumlah);
+        $metode  = $this->request->getPost('metode_bayar');
 
         $supplierInput = $this->request->getPost('supplier_input');
         $mobilInput    = $this->request->getPost('mobil_input');
@@ -104,6 +106,22 @@ class Pembelian extends Controller
             $id_mobil = $mobil['id_mobil'];
         }
 
+        // Handle upload bukti transfer
+        $buktiName = null;
+        if ($metode === 'transfer') {
+            $bukti = $this->request->getFile('bukti_transfer');
+            if ($bukti && $bukti->isValid() && !$bukti->hasMoved()) {
+                $buktiName = $bukti->getRandomName();
+                $bukti->move(ROOTPATH . 'public/uploads/bukti', $buktiName);
+            }
+        }
+
+        // Generate no kwitansi untuk pembayaran tunai
+        $noKwitansi = null;
+        if ($metode === 'tunai') {
+            $noKwitansi = 'PBL-' . date('Ymd') . '-' . rand(1000, 9999);
+        }
+
         $this->model->insert([
             'id_supplier'        => $id_supplier,
             'id_mobil'           => $id_mobil,
@@ -112,14 +130,21 @@ class Pembelian extends Controller
             'harga_beli'         => $harga,
             'jumlah_pembelian'   => $jumlah,
             'total_harga'        => $total,
-            'metode_bayar'       => 'tunai',
-            'bukti_transfer'     => null,
-            'no_kwitansi'        => null,
-            'status_pembelian'   => 'proses',
+            'metode_bayar'       => $metode,
+            'bukti_transfer'     => $buktiName,
+            'no_kwitansi'        => $noKwitansi,
+            'status_pembelian'   => $metode === 'tunai' ? 'selesai' : 'proses',
             'keterangan_kondisi' => $this->request->getPost('keterangan_kondisi'),
         ]);
 
-        return redirect()->to('/pembelian')->with('success', 'Transaksi pembelian berhasil disimpan. Silakan lakukan pembayaran di menu Pembayaran Pembelian untuk memproses stok.');
+        // Update stok mobil
+        $mobil = $this->mobilModel->find($id_mobil);
+        if ($mobil) {
+            $this->mobilModel->update($mobil['id_mobil'], ['stok' => $mobil['stok'] + $jumlah]);
+        }
+
+        return redirect()->to('/pembelian')->with('success', 'Transaksi pembelian berhasil disimpan.' .
+            ($metode === 'tunai' ? ' Kwitansi: ' . $noKwitansi : ' Menunggu verifikasi transfer.'));
     }
 
     public function edit(int $id): string
@@ -153,6 +178,13 @@ class Pembelian extends Controller
 
     public function selesai(int $id)
     {
-        return redirect()->to('/pembayaran_pembelian/create/' . $id);
+        $pembelian = $this->model->find($id);
+        if ($pembelian) {
+            $this->model->update($id, [
+                'status_pembelian' => 'selesai',
+                'no_kwitansi'      => 'PBL-' . date('Ymd') . '-' . rand(1000, 9999),
+            ]);
+        }
+        return redirect()->to('/pembelian')->with('success', 'Status pembelian diperbarui ke Selesai.');
     }
 }

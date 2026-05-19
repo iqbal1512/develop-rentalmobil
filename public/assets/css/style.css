@@ -600,3 +600,431 @@ body {
   body { background: #fff; color: #000; }
   .card { border: 1px solid #ddd; box-shadow: none; }
 }
+
+/* Sharp Validation and Interactive Focus States */
+.form-control, .form-select {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Override Bootstrap default: ganti panah hitam dengan abu-abu halus */
+.form-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.75rem center !important;
+  background-size: 14px 14px !important;
+}
+
+.form-control:focus, .form-select:focus {
+  transform: scale(1.005);
+  box-shadow: 0 4px 12px rgba(17, 24, 37, 0.05), 0 0 0 2px var(--primary) !important;
+}
+
+.form-control.is-valid {
+  border-color: var(--success) !important;
+  box-shadow: 0 0 0 1px var(--success) !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2310b981' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right calc(0.375em + 0.1875rem) center !important;
+  background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem) !important;
+  padding-right: calc(1.5em + 0.75rem) !important;
+}
+
+/* Dropdown valid: centang di kiri chevron → [text] [✓] [▼] */
+.form-select.is-valid {
+  border-color: var(--success) !important;
+  box-shadow: 0 0 0 1px var(--success) !important;
+  background-image:
+    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"),
+    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%2310b981'%3e%3cpath d='M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm3.78 5.53-4.5 4.5a.75.75 0 0 1-1.06 0l-2-2a.75.75 0 1 1 1.06-1.06l1.47 1.47 3.97-3.97a.75.75 0 1 1 1.06 1.06z'/%3e%3c/svg%3e") !important;
+  background-position:
+    right 0.6rem center,
+    right 1.9rem center !important;
+  background-size:
+    14px 14px,
+    14px 14px !important;
+  background-repeat: no-repeat, no-repeat !important;
+  padding-right: 3.4rem !important;
+}
+
+.form-control.is-invalid {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 1px var(--danger) !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23ef4444'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linecap='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23ef4444'/%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right calc(0.375em + 0.1875rem) center !important;
+  background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem) !important;
+  padding-right: calc(1.5em + 0.75rem) !important;
+}
+
+/* Dropdown invalid: tanda seru di kiri chevron → [text] [!] [▼] */
+.form-select.is-invalid {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 1px var(--danger) !important;
+  /* Gambar 1 = chevron (kanan), Gambar 2 = tanda seru (kiri chevron) */
+  background-image:
+    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ef4444' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"),
+    url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ef4444'%3e%3cpath d='M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4zm0 7.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z'/%3e%3c/svg%3e") !important;
+  background-position:
+    right 0.6rem center,
+    right 1.9rem center !important;
+  background-size:
+    14px 14px,
+    14px 14px !important;
+  background-repeat: no-repeat, no-repeat !important;
+  padding-right: 3.4rem !important;
+}
+
+/* Hover Lift and Interactive Animations */
+.card {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04) !important;
+}
+
+.btn {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(17, 24, 37, 0.1) !important;
+}
+.btn:active {
+  transform: translateY(0);
+}
+
+.table tbody tr {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.table tbody tr:hover {
+  background-color: var(--gray-50) !important;
+  transform: scale(1.002);
+  box-shadow: inset 4px 0 0 var(--primary), 0 4px 12px rgba(0, 0, 0, 0.02) !important;
+}
+
+.nav-link {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.nav-link:hover {
+  transform: translateX(6px);
+  background: var(--gray-100) !important;
+}
+.nav-link.active:hover {
+  transform: none;
+}
+
+/* ─── Ripple Effect pada Tombol ─────────────────────────────────────────────── */
+.btn {
+  position: relative;
+  overflow: hidden;
+}
+.btn-ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  background: rgba(255, 255, 255, 0.35);
+  width: 80px;
+  height: 80px;
+  margin-left: -40px;
+  margin-top: -40px;
+  animation: ripple-anim 0.65s linear;
+  pointer-events: none;
+}
+@keyframes ripple-anim {
+  to {
+    transform: scale(4.5);
+    opacity: 0;
+  }
+}
+
+/* ─── Premium SweetAlert2 Popup Styling ─────────────────────────────────────── */
+.swal-premium,
+.swal-welcome {
+  border-radius: 16px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+}
+.swal-welcome .swal2-title {
+  font-size: 1.4rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.3px !important;
+}
+.swal2-timer-progress-bar {
+  background: var(--primary) !important;
+}
+
+/* ─── Focus Ring Halus untuk Semua Input ────────────────────────────────────── */
+.form-control:focus-visible,
+.form-select:focus-visible,
+.btn:focus-visible {
+  outline: none !important;
+}
+
+/* ─── Badge animasi pulse untuk notifikasi ──────────────────────────────────── */
+.badge-pulse {
+  position: relative;
+  display: inline-block;
+}
+.badge-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  animation: badge-ring 1.5s ease-out infinite;
+  opacity: 0;
+}
+@keyframes badge-ring {
+  0%   { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* ─── Smooth page-load overlay fade ────────────────────────────────────────── */
+body {
+  animation: body-fadein 0.3s ease both;
+}
+@keyframes body-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ✨ PREMIUM SURPRISE PACK — AutoPrime Showroom CI4
+   Level: Top-tier Laravel-grade micro-interactions
+   Rule: Zero color changes — only depth, motion & polish
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Custom Premium Scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 5px; height: 5px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  {
+  background: linear-gradient(180deg, var(--gray-300), var(--gray-400));
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--gray-500); }
+
+/* ── 2. Glassmorphism Topbar ─────────────────────────────────────────────── */
+.topbar {
+  backdrop-filter: blur(14px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.4) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  box-shadow: 0 1px 0 0 rgba(0,0,0,0.06), 0 4px 16px -4px rgba(0,0,0,0.04) !important;
+}
+
+/* ── 3. Sidebar Active Pill Indicator ────────────────────────────────────── */
+.sidebar-nav .nav-item { position: relative; }
+.nav-link.active {
+  position: relative;
+}
+.nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: -0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 65%;
+  background: var(--primary);
+  border-radius: 0 3px 3px 0;
+  animation: pill-slide-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes pill-slide-in {
+  from { height: 0; opacity: 0; transform: translateY(-50%) scaleY(0); }
+  to   { height: 65%; opacity: 1; transform: translateY(-50%) scaleY(1); }
+}
+
+/* ── 4. Stat Card Shimmer Sweep on Load ──────────────────────────────────── */
+.stat-card { position: relative; overflow: hidden; }
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 55%; height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 65%
+  );
+  animation: shimmer-sweep 2s ease-in-out 0.3s 1 both;
+  pointer-events: none;
+}
+@keyframes shimmer-sweep {
+  0%   { left: -100%; }
+  100% { left: 160%; }
+}
+
+/* ── 5. Card Header Left Accent Bar ──────────────────────────────────────── */
+.card-header {
+  position: relative;
+  padding-left: 1.75rem !important;
+}
+.card-header::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 22%; bottom: 22%;
+  width: 3px;
+  background: var(--primary);
+  border-radius: 0 3px 3px 0;
+  opacity: 0.85;
+}
+
+/* ── 6. Table Header Gradient Underline ──────────────────────────────────── */
+.table thead {
+  position: relative;
+}
+.table thead tr th:first-child {
+  position: relative;
+}
+.table thead tr th:first-child::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 2px;
+  width: 300vw;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--gray-200) 60%, transparent 100%);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* ── 7. Button Shine Effect ──────────────────────────────────────────────── */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  transition: left 0.45s ease;
+  pointer-events: none;
+}
+.btn-primary:hover::after {
+  left: 150%;
+}
+
+/* ── 8. User Avatar Rotating Premium Ring ────────────────────────────────── */
+.user-avatar {
+  position: relative;
+  z-index: 0;
+}
+.user-avatar::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 0deg,
+    var(--gray-300) 0%,
+    var(--primary) 30%,
+    var(--gray-200) 60%,
+    var(--gray-300) 100%
+  );
+  z-index: -1;
+  animation: avatar-ring-spin 5s linear infinite;
+}
+@keyframes avatar-ring-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── 9. Top Page Loader Bar ──────────────────────────────────────────────── */
+#nprogress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2.5px;
+  background: var(--primary);
+  z-index: 99999;
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 8px var(--gray-400);
+  transition: width 0.3s ease, opacity 0.4s ease;
+  width: 0;
+  opacity: 0;
+}
+#nprogress-bar.loading {
+  opacity: 1;
+  animation: nbar-indeterminate 1.5s ease-in-out infinite;
+}
+@keyframes nbar-indeterminate {
+  0%   { left: -35%;  width: 35%; }
+  60%  { left: 100%;  width: 100%; }
+  100% { left: 100%;  width: 0%; }
+}
+
+/* ── 10. Sidebar hover slide indicator ───────────────────────────────────── */
+.nav-link:not(.active):hover {
+  padding-left: 1rem !important;
+}
+
+/* ── 11. Input focus floating shadow ─────────────────────────────────────── */
+.form-control:focus,
+.form-select:focus {
+  box-shadow:
+    0 0 0 2px rgba(17, 24, 37, 0.08),
+    0 4px 16px rgba(17, 24, 37, 0.06),
+    0 0 0 1px var(--primary) !important;
+}
+
+/* ── 12. Stat card hover glow ────────────────────────────────────────────── */
+.stat-card:hover {
+  box-shadow:
+    0 8px 30px -8px rgba(0,0,0,0.14),
+    0 0 0 1px rgba(0,0,0,0.03),
+    inset 0 0 20px rgba(255,255,255,0.6) !important;
+}
+
+/* ── 13. Badge premium pill pulse (for status badges) ────────────────────── */
+.badge-success,
+.badge-danger,
+.badge-warning {
+  position: relative;
+}
+
+/* ── 14. Card hover inner glow ───────────────────────────────────────────── */
+.card:hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.8);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.card:hover::after { opacity: 1; }
+
+/* ── 15. Sidebar brand logo subtle pulse ─────────────────────────────────── */
+.brand-custom-logo svg {
+  animation: logo-breathe 4s ease-in-out infinite;
+}
+@keyframes logo-breathe {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.06); }
+}
+
+/* ── 16. Topbar badge live dot pulse ─────────────────────────────────────── */
+.topbar-badge .bi-circle-fill {
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.7); }
+}
+
+/* ── 17. Table rows smooth left highlight ────────────────────────────────── */
+.table tbody tr {
+  transition: background 0.18s ease, box-shadow 0.18s ease !important;
+}
+.table tbody tr:hover td:first-child {
+  box-shadow: inset 3px 0 0 var(--primary) !important;
+}
+
+/* ── 18. Form group focus-within label highlight ─────────────────────────── */
+.form-group:focus-within .form-label {
+  color: var(--gray-900) !important;
+  font-weight: 600 !important;
+  transition: color 0.2s, font-weight 0.2s;
+}

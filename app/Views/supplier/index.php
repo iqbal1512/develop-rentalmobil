@@ -54,7 +54,7 @@
                                     <a href="<?= base_url('supplier/edit/' . $s['id_supplier']) ?>" class="btn btn-sm btn-outline-warning" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <a href="<?= base_url('supplier/delete/' . $s['id_supplier']) ?>" class="btn btn-sm btn-outline-danger" title="Hapus" onclick="return confirm('Yakin hapus supplier ini?')">
+                                    <a href="<?= base_url('supplier/delete/' . $s['id_supplier']) ?>" class="btn btn-sm btn-outline-danger confirm-delete" title="Hapus">
                                         <i class="bi bi-trash"></i>
                                     </a>
                                 </div>

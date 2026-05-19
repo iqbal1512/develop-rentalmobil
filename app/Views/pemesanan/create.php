@@ -1,10 +1,10 @@
 <?php $title = 'Tambah Pemesanan'; ?>
 <?= view('templates/header') ?>
 
-<div class="card bg-white border-light shadow-sm text-dark" style="max-width:850px;margin:0 auto">
-  <div class="card-header bg-white text-dark border-light">
-    <h5><i class="bi bi-calendar-plus-fill text-accent"></i> Tambah Pemesanan Mobil</h5>
-    <a href="<?= base_url('pemesanan') ?>" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i> Kembali</a>
+<div class="card" style="max-width: 900px; margin: 0 auto;">
+  <div class="card-header">
+    <h5><i class="bi bi-calendar-plus-fill" style="color: var(--primary);"></i> Tambah Pemesanan Mobil</h5>
+    <a href="<?= base_url('pemesanan') ?>" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
   </div>
   <div class="card-body">
     <!-- Info bisnis -->
@@ -13,12 +13,14 @@
       <strong>Syarat Pemesanan:</strong> Bukti pesanan Rp500.000 + DP 30% dalam 7 hari + Fotocopy KTP. Lewat 7 hari → otomatis batal.
     </div>
 
+    <p style="color: var(--gray-500); font-size: 0.875rem; margin-bottom: 1.5rem;">Lengkapi formulir di bawah ini untuk mencatat pemesanan unit kendaraan.</p>
+
     <form action="<?= base_url('pemesanan/store') ?>" method="POST">
       <?= csrf_field() ?>
       <div class="row">
-        <div class="col-6"><div class="form-group">
-          <label class="form-label text-dark">Customer <span style="color:var(--danger)">*</span></label>
-          <select name="id_customer" class="form-select bg-white text-dark border-light " required>
+        <div class="col-md-6 form-group">
+          <label class="form-label">Customer <span class="text-danger">*</span></label>
+          <select name="id_customer" class="form-select" required>
             <option value="">-- Pilih Customer --</option>
             <?php foreach ($customers as $c): ?>
             <option value="<?= $c['id_customer'] ?>" <?= old('id_customer') == $c['id_customer'] ? 'selected' : '' ?>>
@@ -26,10 +28,10 @@
             </option>
             <?php endforeach; ?>
           </select>
-        </div></div>
-        <div class="col-6"><div class="form-group">
-          <label class="form-label text-dark">Mobil <span style="color:var(--danger)">*</span></label>
-          <select name="id_mobil" id="mobilSel" class="form-select bg-white text-dark border-light " required>
+        </div>
+        <div class="col-md-6 form-group">
+          <label class="form-label">Mobil <span class="text-danger">*</span></label>
+          <select name="id_mobil" id="mobilSel" class="form-select" required>
             <option value="">-- Pilih Mobil Tersedia --</option>
             <?php foreach ($mobils as $m): ?>
             <option value="<?= $m['id_mobil'] ?>" data-harga="<?= $m['harga_jual'] ?>" <?= old('id_mobil') == $m['id_mobil'] ? 'selected' : '' ?>>
@@ -37,56 +39,69 @@
             </option>
             <?php endforeach; ?>
           </select>
-        </div></div>
-        <div class="col-4"><div class="form-group">
-          <label class="form-label text-dark">Tanggal Pesan <span style="color:var(--danger)">*</span></label>
-          <input type="date" name="tgl_pesan" id="tglPesan" class="form-control bg-white text-dark border-light " value="<?= old('tgl_pesan', date('Y-m-d')) ?>" required>
-        </div></div>
-        <div class="col-4"><div class="form-group">
-          <label class="form-label text-dark">Jatuh Tempo (otomatis +7 hari)</label>
-          <input type="date" name="tgl_jatuh_tempo" id="tglTempo" class="form-control bg-white text-dark border-light " readonly style="background:var(--bg-primary)">
-        </div></div>
-        <div class="col-4"><div class="form-group">
-          <label class="form-label text-dark">Biaya Bukti Pesan</label>
-          <input type="text" class="form-control bg-white text-dark border-light " value="Rp500.000" readonly style="background:var(--bg-primary)">
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-md-4 form-group">
+          <label class="form-label">Tanggal Pesan <span class="text-danger">*</span></label>
+          <input type="date" name="tgl_pesan" id="tglPesan" class="form-control" value="<?= old('tgl_pesan', date('Y-m-d')) ?>" required>
+        </div>
+        <div class="col-md-4 form-group">
+          <label class="form-label">Jatuh Tempo (otomatis +7 hari)</label>
+          <input type="date" name="tgl_jatuh_tempo" id="tglTempo" class="form-control" readonly style="background:var(--bg-primary)">
+        </div>
+        <div class="col-md-4 form-group">
+          <label class="form-label">Biaya Bukti Pesan</label>
+          <input type="text" class="form-control" value="Rp500.000" readonly style="background:var(--bg-primary)">
           <input type="hidden" name="biaya_bukti_pesan" value="500000">
-        </div></div>
-        <div class="col-4"><div class="form-group">
-          <label class="form-label text-dark">Harga Jual Mobil</label>
-          <input type="number" name="harga_jual" id="hargaJual" class="form-control bg-white text-dark border-light " value="<?= old('harga_jual', 0) ?>" min="0" readonly style="background:var(--bg-primary)">
-        </div></div>
-        <div class="col-4"><div class="form-group">
-          <label class="form-label text-dark">Harga Jual Jadi (setelah nego) <span style="color:var(--danger)">*</span></label>
-          <input type="number" name="harga_jual_jadi" id="hargaJadi" class="form-control bg-white text-dark border-light " value="<?= old('harga_jual_jadi', 0) ?>" min="0" required>
-        </div></div>
-        <div class="col-4"><div class="form-group">
-          <label class="form-label text-dark">Nominal DP (30%)</label>
-          <input type="number" name="nominal_dp" id="nominalDp" class="form-control bg-white text-dark border-light " value="<?= old('nominal_dp', 0) ?>" min="0" readonly style="background:var(--bg-primary)">
-        </div></div>
-        <div class="col-6"><div class="form-group">
-          <label class="form-label text-dark">DP Awal Dibayar</label>
-          <input type="number" name="dp_awal_dibayar" id="dpAwal" class="form-control bg-white text-dark border-light " value="<?= old('dp_awal_dibayar', 500000) ?>" min="0">
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-md-4 form-group">
+          <label class="form-label">Harga Jual Mobil</label>
+          <input type="number" name="harga_jual" id="hargaJual" class="form-control" value="<?= old('harga_jual', 0) ?>" min="0" readonly style="background:var(--bg-primary)">
+        </div>
+        <div class="col-md-4 form-group">
+          <label class="form-label">Harga Jual Jadi (setelah nego) <span class="text-danger">*</span></label>
+          <input type="number" name="harga_jual_jadi" id="hargaJadi" class="form-control" value="<?= old('harga_jual_jadi', 0) ?>" min="0" required>
+        </div>
+        <div class="col-md-4 form-group">
+          <label class="form-label">Nominal DP (30%)</label>
+          <input type="number" name="nominal_dp" id="nominalDp" class="form-control" value="<?= old('nominal_dp', 0) ?>" min="0" readonly style="background:var(--bg-primary)">
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-md-6 form-group">
+          <label class="form-label">DP Awal Dibayar</label>
+          <input type="number" name="dp_awal_dibayar" id="dpAwal" class="form-control" value="<?= old('dp_awal_dibayar', 500000) ?>" min="0">
           <div class="form-text text-secondary">Min: Rp500.000 (bukti pesan)</div>
-        </div></div>
-        <div class="col-6"><div class="form-group">
-          <label class="form-label text-dark">Sisa DP Internal</label>
-          <input type="number" name="sisa_dp_internal" id="sisaDp" class="form-control bg-white text-dark border-light " value="<?= old('sisa_dp_internal', 0) ?>" readonly style="background:var(--bg-primary)">
-        </div></div>
-        <div class="col-6"><div class="form-group">
-          <label class="form-label text-dark">KTP Sudah Diterima?</label>
-          <select name="ktp_diterima" class="form-select bg-white text-dark border-light ">
+        </div>
+        <div class="col-md-6 form-group">
+          <label class="form-label">Sisa DP Internal</label>
+          <input type="number" name="sisa_dp_internal" id="sisaDp" class="form-control" value="<?= old('sisa_dp_internal', 0) ?>" readonly style="background:var(--bg-primary)">
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-md-6 form-group">
+          <label class="form-label">KTP Sudah Diterima?</label>
+          <select name="ktp_diterima" class="form-select">
             <option value="0" <?= old('ktp_diterima') == '0' ? 'selected' : '' ?>>Belum</option>
             <option value="1" <?= old('ktp_diterima') == '1' ? 'selected' : '' ?>>Sudah</option>
           </select>
-        </div></div>
-        <div class="col-12"><div class="form-group">
-          <label class="form-label text-dark">Catatan</label>
-          <textarea name="catatan" class="form-control bg-white text-dark border-light " rows="2" placeholder="Catatan tambahan..."><?= old('catatan') ?></textarea>
-        </div></div>
+        </div>
+        <div class="col-md-6 form-group">
+          <label class="form-label">Catatan</label>
+          <textarea name="catatan" class="form-control" rows="2" placeholder="Catatan tambahan..."><?= old('catatan') ?></textarea>
+        </div>
       </div>
-      <div class="d-flex justify-content-end gap-2" style="margin-top:8px">
-        <a href="<?= base_url('pemesanan') ?>" class="btn btn-secondary">Batal</a>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-save2"></i> Simpan Pemesanan</button>
+
+      <div class="d-flex justify-content-between align-items-center mt-4 pt-4" style="border-top: 1px solid var(--gray-200);">
+        <a href="<?= base_url('pemesanan') ?>" class="btn btn-secondary">Batalkan</a>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle"></i> Simpan Pemesanan</button>
       </div>
     </form>
   </div>

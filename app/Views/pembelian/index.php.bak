@@ -62,14 +62,16 @@
                   <td class="text-center">
                     <div class="btn-group">
                       <?php if ($status === 'proses'): ?>
-                        <a href="<?= base_url('pembayaran_pembelian/create/' . $p['id_pembelian']) ?>" class="btn btn-sm btn-outline-success" title="Bayar Sekarang">
-                          <i class="bi bi-credit-card-fill"></i>
+                        <a href="<?= base_url('pembelian/selesai/' . $p['id_pembelian']) ?>" class="btn btn-sm btn-outline-success" 
+                           onclick="return confirm('Selesaikan transaksi? Stok mobil akan otomatis bertambah.')">
+                          <i class="bi bi-check-lg"></i>
                         </a>
                         <a href="<?= base_url('pembelian/edit/' . $p['id_pembelian']) ?>" class="btn btn-sm btn-outline-warning">
                           <i class="bi bi-pencil-fill"></i>
                         </a>
                       <?php endif; ?>
-                      <a href="<?= base_url('pembelian/delete/' . $p['id_pembelian']) ?>" class="btn btn-sm btn-outline-danger confirm-delete" title="Hapus">
+                      <a href="<?= base_url('pembelian/delete/' . $p['id_pembelian']) ?>" class="btn btn-sm btn-outline-danger" 
+                         onclick="return confirm('Hapus transaksi ini?')">
                         <i class="bi bi-trash3-fill"></i>
                       </a>
                     </div>

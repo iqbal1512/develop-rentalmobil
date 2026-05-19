@@ -71,16 +71,16 @@
                                                 <?php endif; ?>
                                                 
                                                 <?php if(!$p['tgl_serah_stnk']): ?>
-                                                <form action="<?= base_url('penyerahan/updateStnk/' . $p['id_penyerahan']) ?>" method="post" class="d-inline" onsubmit="return confirm('Tandai STNK sudah diserahkan?');">
+                                                <form action="<?= base_url('penyerahan/updateStnk/' . $p['id_penyerahan']) ?>" method="post" class="d-inline" onsubmit="event.preventDefault(); confirmFormSubmit(this, 'Konfirmasi Serah STNK', 'Tandai STNK sudah diserahkan?');">
                                                     <?= csrf_field() ?>
                                                     <button type="submit" class="btn btn-sm btn-outline-success" title="Serah STNK">
                                                         <i class="bi bi-card-heading"></i>
                                                     </button>
                                                 </form>
                                                 <?php endif; ?>
-
+ 
                                                 <?php if(!$p['tgl_serah_bpkb']): ?>
-                                                <form action="<?= base_url('penyerahan/updateBpkb/' . $p['id_penyerahan']) ?>" method="post" class="d-inline" onsubmit="return confirm('Tandai BPKB sudah diserahkan?');">
+                                                <form action="<?= base_url('penyerahan/updateBpkb/' . $p['id_penyerahan']) ?>" method="post" class="d-inline" onsubmit="event.preventDefault(); confirmFormSubmit(this, 'Konfirmasi Serah BPKB', 'Tandai BPKB sudah diserahkan?');">
                                                     <?= csrf_field() ?>
                                                     <button type="submit" class="btn btn-sm btn-outline-success" title="Serah BPKB">
                                                         <i class="bi bi-journal-text"></i>
