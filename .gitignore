@@ -7,3 +7,9 @@
 
 .DS_Store
 Thumbs.db
+
+# backup files
+*.bak
+
+# upload files
+/public/uploads/
