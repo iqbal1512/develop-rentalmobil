@@ -1,0 +1,146 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Models\PembelianModel;
+use App\Models\MobilModel;
+use App\Models\SupplierModel;
+use CodeIgniter\Controller;
+
+/**
+ * Pembelian Controller
+ * Proses bisnis: beli mobil dari supplier (tunai/transfer)
+ */
+class Pembelian extends Controller
+{
+    protected PembelianModel $model;
+    protected MobilModel     $mobilModel;
+    protected SupplierModel  $supplierModel;
+
+    public function __construct()
+    {
+        $this->model         = new PembelianModel();
+        $this->mobilModel    = new MobilModel();
+        $this->supplierModel = new SupplierModel();
+        helper(['form', 'url']);
+    }
+
+    public function index(): string
+    {
+        return view('pembelian/index', [
+            'title'     => 'Kelola Transaksi Pembelian',
+            'pembelian' => $this->model->getAllWithRelasi(),
+        ]);
+    }
+
+    public function create(): string
+    {
+        return view('pembelian/create', [
+            'title'     => 'Tambah Transaksi Pembelian',
+            'suppliers' => $this->supplierModel->findAll(),
+            'mobils'    => $this->mobilModel->findAll(),
+        ]);
+    }
+
+    public function store()
+    {
+        $rules = [
+            'id_supplier'      => 'required|integer',
+            'id_mobil'         => 'required|integer',
+            'tgl_pembelian'    => 'required|valid_date',
+            'harga_beli'       => 'required',
+            'jumlah_pembelian' => 'required|integer|greater_than[0]',
+            'metode_bayar'     => 'required|in_list[tunai,transfer]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $harga   = (float) str_replace([',', '.'], '', $this->request->getPost('harga_beli'));
+        $jumlah  = (int)   $this->request->getPost('jumlah_pembelian');
+        $total   = $this->model->hitungTotal($harga, $jumlah);
+        $metode  = $this->request->getPost('metode_bayar');
+
+        // Handle upload bukti transfer
+        $buktiName = null;
+        if ($metode === 'transfer') {
+            $bukti = $this->request->getFile('bukti_transfer');
+            if ($bukti && $bukti->isValid() && !$bukti->hasMoved()) {
+                $buktiName = $bukti->getRandomName();
+                $bukti->move(ROOTPATH . 'public/uploads/bukti', $buktiName);
+            }
+        }
+
+        // Generate no kwitansi untuk pembayaran tunai
+        $noKwitansi = null;
+        if ($metode === 'tunai') {
+            $noKwitansi = 'PBL-' . date('Ymd') . '-' . rand(1000, 9999);
+        }
+
+        $this->model->insert([
+            'id_supplier'        => $this->request->getPost('id_supplier'),
+            'id_mobil'           => $this->request->getPost('id_mobil'),
+            'id_user'            => session()->get('id_user'),
+            'tgl_pembelian'      => $this->request->getPost('tgl_pembelian'),
+            'harga_beli'         => $harga,
+            'jumlah_pembelian'   => $jumlah,
+            'total_harga'        => $total,
+            'metode_bayar'       => $metode,
+            'bukti_transfer'     => $buktiName,
+            'no_kwitansi'        => $noKwitansi,
+            'status_pembelian'   => $metode === 'tunai' ? 'selesai' : 'proses',
+            'keterangan_kondisi' => $this->request->getPost('keterangan_kondisi'),
+        ]);
+
+        // Update stok mobil
+        $mobil = $this->mobilModel->find($this->request->getPost('id_mobil'));
+        if ($mobil) {
+            $this->mobilModel->update($mobil['id_mobil'], ['stok' => $mobil['stok'] + $jumlah]);
+        }
+
+        return redirect()->to('/pembelian')->with('success', 'Transaksi pembelian berhasil disimpan.' .
+            ($metode === 'tunai' ? ' Kwitansi: ' . $noKwitansi : ' Menunggu verifikasi transfer.'));
+    }
+
+    public function edit(int $id): string
+    {
+        $pembelian = $this->model->find($id);
+        if (!$pembelian) {
+            return redirect()->to('/pembelian')->with('error', 'Data tidak ditemukan.');
+        }
+        return view('pembelian/edit', [
+            'title'     => 'Edit Transaksi Pembelian',
+            'pembelian' => $pembelian,
+            'suppliers' => $this->supplierModel->findAll(),
+            'mobils'    => $this->mobilModel->findAll(),
+        ]);
+    }
+
+    public function update(int $id)
+    {
+        $this->model->update($id, [
+            'status_pembelian'   => $this->request->getPost('status_pembelian'),
+            'keterangan_kondisi' => $this->request->getPost('keterangan_kondisi'),
+        ]);
+        return redirect()->to('/pembelian')->with('success', 'Transaksi pembelian berhasil diperbarui.');
+    }
+
+    public function delete(int $id)
+    {
+        $this->model->delete($id);
+        return redirect()->to('/pembelian')->with('success', 'Transaksi pembelian berhasil dihapus.');
+    }
+
+    public function selesai(int $id)
+    {
+        $pembelian = $this->model->find($id);
+        if ($pembelian) {
+            $this->model->update($id, [
+                'status_pembelian' => 'selesai',
+                'no_kwitansi'      => 'PBL-' . date('Ymd') . '-' . rand(1000, 9999),
+            ]);
+        }
+        return redirect()->to('/pembelian')->with('success', 'Status pembelian diperbarui ke Selesai.');
+    }
+}
