@@ -68,8 +68,11 @@ class Pemesanan extends Controller
         }
 
         $hargaJualJadi = (float) str_replace([',', '.'], '', $this->request->getPost('harga_jual_jadi'));
-        $dpPersen      = 30;
-        $nominalDp     = $this->model->hitungNominalDP($hargaJualJadi, $dpPersen);
+        
+        $inputDp = $this->request->getPost('nominal_dp');
+        $nominalDp = !empty($inputDp) ? (float) str_replace([',', '.'], '', $inputDp) : $this->model->hitungNominalDP($hargaJualJadi, 30);
+        $dpPersen = $hargaJualJadi > 0 ? round(($nominalDp / $hargaJualJadi) * 100, 2) : 30;
+        
         $tglPesan      = $this->request->getPost('tgl_pesan');
         // Jatuh tempo 7 hari dari tgl pesan
         $tglJatuhTempo = date('Y-m-d', strtotime($tglPesan . ' +7 days'));
@@ -99,7 +102,7 @@ class Pemesanan extends Controller
             "Pemesanan berhasil dibuat. Jatuh tempo: {$tglJatuhTempo}. DP yang harus dibayar: Rp " . number_format($nominalDp, 0, ',', '.'));
     }
 
-    public function edit(int $id): string
+    public function edit(int $id)
     {
         $pemesanan = $this->model->getDetailWithRelasi($id);
         if (!$pemesanan) {
@@ -138,7 +141,7 @@ class Pemesanan extends Controller
         return redirect()->to('/pemesanan')->with('success', 'Data pemesanan berhasil diperbarui.');
     }
 
-    public function detail(int $id): string
+    public function detail(int $id)
     {
         $pemesanan = $this->model->getDetailWithRelasi($id);
         if (!$pemesanan) {
@@ -176,7 +179,7 @@ class Pemesanan extends Controller
     }
 
     /** Cek dan tampilkan pemesanan yang expired */
-    public function cekTempo(): string
+    public function cekTempo()
     {
         $expired = $this->model->cekTempo();
         return view('pemesanan/cek_tempo', [

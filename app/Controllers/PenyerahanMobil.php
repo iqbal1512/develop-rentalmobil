@@ -33,7 +33,7 @@ class PenyerahanMobil extends Controller
         ]);
     }
 
-    public function create(int $idPenjualan): string
+    public function create(int $idPenjualan)
     {
         $penjualan = $this->penjualanModel->getDetailWithRelasi($idPenjualan);
         if (!$penjualan) {
@@ -93,7 +93,7 @@ class PenyerahanMobil extends Controller
         return redirect()->to('/penyerahan')->with('success', $msg);
     }
 
-    public function edit(int $id): string
+    public function edit(int $id)
     {
         $penyerahan = $this->model->getDetailWithRelasi($id);
         if (!$penyerahan) {
@@ -126,7 +126,7 @@ class PenyerahanMobil extends Controller
         return redirect()->to('/penyerahan')->with('success', 'BPKB telah diserahkan.');
     }
 
-    public function cetakSuratJalan(int $id): string
+    public function cetakSuratJalan(int $id)
     {
         $penyerahan = $this->model->getDetailWithRelasi($id);
         if (!$penyerahan || $penyerahan['metode_serah'] !== 'diantar') {

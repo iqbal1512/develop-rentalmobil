@@ -50,10 +50,10 @@
             <?php foreach ($data as $i => $row): ?>
             <tr>
                 <td><?= $i + 1 ?></td>
-                <td><?= date('d/m/Y', strtotime($row['tgl_beli'])) ?></td>
-                <td><?= htmlspecialchars($row['nama_supplier']) ?></td>
-                <td><?= htmlspecialchars($row['nama_mobil']) ?></td>
-                <td><?= ucfirst($row['status_beli']) ?></td>
+                <td><?= date('d/m/Y', strtotime($row['tgl_pembelian'])) ?></td>
+                <td><?= htmlspecialchars($row['nama_supplier'] ?? '-') ?></td>
+                <td><?= htmlspecialchars($row['nama_mobil'] ?? '-') ?></td>
+                <td><?= ucfirst($row['status_pembelian'] ?? '-') ?></td>
                 <td class="text-right">Rp <?= number_format($row['total_harga'], 0, ',', '.') ?></td>
             </tr>
             <?php endforeach; ?>
@@ -84,7 +84,7 @@
             <?php foreach ($data as $i => $row): ?>
             <tr>
                 <td><?= $i + 1 ?></td>
-                <td><?= date('d/m/Y', strtotime($row['tgl_jual'])) ?></td>
+                <td><?= date('d/m/Y', strtotime($row['tgl_penjualan'])) ?></td>
                 <td><?= htmlspecialchars($row['nama_customer']) ?></td>
                 <td><?= htmlspecialchars($row['nama_mobil']) ?></td>
                 <td class="text-right">Rp <?= number_format($row['total_harga'], 0, ',', '.') ?></td>

@@ -9,6 +9,16 @@
     <div class="card-body">
         <p style="color: var(--gray-500); font-size: 0.875rem; margin-bottom: 1.5rem;">Lengkapi formulir di bawah ini untuk mencatat transaksi pembelian unit kendaraan baru.</p>
 
+        <?php if (session()->getFlashdata('errors')) : ?>
+            <div class="alert alert-danger" style="color: #a94442; background-color: #f2dede; border-color: #ebccd1; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;">
+                <ul style="margin-bottom: 0;">
+                <?php foreach (session()->getFlashdata('errors') as $error) : ?>
+                    <li><?= esc($error) ?></li>
+                <?php endforeach ?>
+                </ul>
+            </div>
+        <?php endif ?>
+
         <form action="<?= base_url('pembelian/store') ?>" method="POST" enctype="multipart/form-data">
             <?= csrf_field() ?>
             
@@ -50,6 +60,20 @@
             </div>
 
             <div class="row mt-3">
+                <div class="col-md-6 form-group">
+                    <label class="form-label">Metode Bayar <span class="text-danger">*</span></label>
+                    <select name="metode_bayar" id="metode_bayar" class="form-control" required>
+                        <option value="tunai" <?= old('metode_bayar') === 'tunai' ? 'selected' : '' ?>>Tunai</option>
+                        <option value="transfer" <?= old('metode_bayar') === 'transfer' ? 'selected' : '' ?>>Transfer Bank</option>
+                    </select>
+                </div>
+                <div class="col-md-6 form-group" id="group_bukti" style="display: none;">
+                    <label class="form-label">Bukti Transfer</label>
+                    <input type="file" name="bukti_transfer" class="form-control">
+                </div>
+            </div>
+
+            <div class="row mt-3">
                 <div class="col-md-4 form-group">
                     <label class="form-label">Jumlah Unit <span class="text-danger">*</span></label>
                     <input type="number" name="jumlah_pembelian" id="qty" class="form-control" value="<?= old('jumlah_pembelian', 1) ?>" min="1" required>
@@ -61,6 +85,13 @@
                 <div class="col-md-4 form-group">
                     <label class="form-label text-success" style="font-weight: 600;">Total Harga</label>
                     <input type="number" name="total_harga" id="total_harga" class="form-control text-success" style="font-weight: 600;" readonly>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-12 form-group">
+                    <label class="form-label">Keterangan Kondisi</label>
+                    <textarea name="keterangan_kondisi" class="form-control" rows="2" placeholder="Catatan kondisi unit..."><?= old('keterangan_kondisi') ?></textarea>
                 </div>
             </div>
 
@@ -81,6 +112,20 @@
         const qtyInput = document.getElementById('qty');
         const hargaInput = document.getElementById('harga_beli');
         const totalInput = document.getElementById('total_harga');
+        
+        // Tambahan Script penampil upload file bukti transfer
+        const metodeBayar = document.getElementById('metode_bayar');
+        const groupBukti = document.getElementById('group_bukti');
+
+        function toggleBukti() {
+            if (metodeBayar.value === 'transfer') {
+                groupBukti.style.display = 'block';
+            } else {
+                groupBukti.style.display = 'none';
+            }
+        }
+        metodeBayar.addEventListener('change', toggleBukti);
+        toggleBukti();
 
         function hitungTotal() {
             const qty = parseInt(qtyInput.value) || 0;
@@ -96,6 +141,10 @@
                 totalInput.parentNode.appendChild(preview);
             }
             preview.innerHTML = `<i class="bi bi-tags-fill me-1"></i> Terbilang: ` + formatRupiah(total);
+        }
+
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
         }
 
         mobilInput.addEventListener('input', function() {

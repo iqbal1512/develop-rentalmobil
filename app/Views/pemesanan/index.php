@@ -16,8 +16,8 @@
               <th class="text-center">#</th> <th>Customer</th> <th>Mobil</th> <th>Tgl Pesan</th> <th>Jatuh Tempo</th> <th>Harga Jadi</th> <th>DP</th> <th class="text-center">KTP</th> <th class="text-center">Status</th> <th class="text-center">Aksi</th> </tr>
           </thead>
           <tbody>
-            <?php if (!empty($pemesanans)): ?>
-                <?php foreach ($pemesanans as $i => $p): ?>
+            <?php if (!empty($pemesanan)): ?>
+                <?php foreach ($pemesanan as $i => $p): ?>
                 <tr>
                   <td class="text-center"><?= $i + 1 ?></td>
                   <td><?= esc($p['nama_customer'] ?? '-') ?></td>

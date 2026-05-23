@@ -39,7 +39,7 @@ class Pembayaran extends Controller
         ]);
     }
 
-    public function create(int $idPenjualan): string
+    public function create(int $idPenjualan)
     {
         $penjualan = $this->penjualanModel->getDetailWithRelasi($idPenjualan);
         if (!$penjualan) {
@@ -172,7 +172,7 @@ class Pembayaran extends Controller
         return redirect()->to('/pembayaran')->with('warning', 'Bukti transfer ditolak.');
     }
 
-    public function detail(int $id): string
+    public function detail(int $id)
     {
         $pembayaran = $this->model->find($id);
         if (!$pembayaran) {
@@ -182,7 +182,7 @@ class Pembayaran extends Controller
     }
 
     /** Cetak Kwitansi */
-    public function cetakKwitansi(int $id): string
+    public function cetakKwitansi(int $id)
     {
         $pembayaran = $this->model->getAllWithRelasi();
         $data       = array_filter($pembayaran, fn($p) => $p['id_pembayaran'] === $id);

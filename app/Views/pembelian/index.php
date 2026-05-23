@@ -32,8 +32,8 @@
             </tr>
           </thead>
           <tbody>
-            <?php if (!empty($pembelians)): ?>
-                <?php foreach ($pembelians as $i => $p): ?>
+            <?php if (!empty($pembelian)): ?>
+                <?php foreach ($pembelian as $i => $p): ?>
                 <tr>
                   <td class="text-center"><?= $i + 1 ?></td>
                   <td class="text-info fw-bold"><?= esc($p['no_kwitansi'] ?? '-') ?></td>

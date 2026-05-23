@@ -88,6 +88,22 @@ class PemesananModel extends Model
     }
 
     /**
+     * Cek pemesanan yang sudah melewati jatuh tempo (status masih 'menunggu')
+     * Digunakan di halaman cek-tempo untuk laporan pemesanan expired
+     */
+    public function cekTempo(): array
+    {
+        return $this->select('pemesanan.*, customer.nama as nama_customer,
+                              mobil.nama_mobil, mobil.tipe, mobil.warna')
+                    ->join('customer', 'customer.id_customer = pemesanan.id_customer', 'left')
+                    ->join('mobil',    'mobil.id_mobil = pemesanan.id_mobil',           'left')
+                    ->where('status_pemesanan', 'menunggu')
+                    ->where('tgl_jatuh_tempo <', date('Y-m-d'))
+                    ->orderBy('tgl_jatuh_tempo', 'ASC')
+                    ->findAll();
+    }
+
+    /**
      * Laporan pemesanan per periode
      */
     public function getLaporan(string $tglMulai, string $tglAkhir): array

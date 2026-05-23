@@ -11,7 +11,7 @@ use CodeIgniter\Controller;
  * Pembelian Controller
  * Proses bisnis: beli mobil dari supplier (tunai/transfer)
  */
-class Pembelian extends Controller
+class Pembelian extends BaseController
 {
     protected PembelianModel $model;
     protected MobilModel     $mobilModel;
@@ -27,9 +27,17 @@ class Pembelian extends Controller
 
     public function index(): string
     {
+        $dataPembelian = $this->model
+            ->select('pembelian.*, supplier.nama_supplier, mobil.nama_mobil, mobil.tipe, users.nama as nama_user')
+            ->join('supplier', 'supplier.id_supplier = pembelian.id_supplier', 'left')
+            ->join('mobil',    'mobil.id_mobil = pembelian.id_mobil',           'left')
+            ->join('users',    'users.id_user = pembelian.id_user',             'left')
+            ->orderBy('pembelian.tgl_pembelian', 'DESC')
+            ->findAll();
+
         return view('pembelian/index', [
             'title'     => 'Kelola Transaksi Pembelian',
-            'pembelian' => $this->model->getAllWithRelasi(),
+            'pembelian' => $dataPembelian,
         ]);
     }
 
@@ -44,38 +52,44 @@ class Pembelian extends Controller
 
     public function store()
     {
+        // 1. Validasi Input Form
         $rules = [
             'supplier_input'   => 'required',
             'mobil_input'      => 'required',
             'tgl_pembelian'    => 'required|valid_date',
             'harga_beli'       => 'required',
             'jumlah_pembelian' => 'required|integer|greater_than[0]',
+            'metode_bayar'     => 'required|in_list[tunai,transfer]',
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            // Gabungkan pesan error agar mudah dibaca di view flashdata 'error'
+            $errorMsg = implode(', ', $this->validator->getErrors());
+            return redirect()->back()->withInput()->with('error', 'Gagal validasi: ' . $errorMsg);
         }
 
+        // 2. Formatting Nominal & Angka
         $harga   = (float) str_replace([',', '.'], '', $this->request->getPost('harga_beli'));
         $jumlah  = (int)   $this->request->getPost('jumlah_pembelian');
         $total   = $this->model->hitungTotal($harga, $jumlah);
+        $metode  = $this->request->getPost('metode_bayar');
 
         $supplierInput = $this->request->getPost('supplier_input');
         $mobilInput    = $this->request->getPost('mobil_input');
 
-        // Resolve supplier
+        // 3. Resolve / Cocokkan ID Supplier
         $supplier = $this->supplierModel->where('nama_supplier', $supplierInput)->first();
         if (!$supplier) {
             $this->supplierModel->insert([
                 'nama_supplier' => $supplierInput,
                 'alamat'        => '-',
             ]);
-            $id_supplier = $this->supplierModel->getInsertID();
+            $id_supplier = $this->supplierModel->getInsertID(); // Gunakan getInsertID() standar CI4
         } else {
             $id_supplier = $supplier['id_supplier'];
         }
 
-        // Resolve mobil
+        // 4. Resolve / Cocokkan ID Mobil
         $mobilName = $mobilInput;
         $warna = 'Default';
         if (preg_match('/^(.*?)\s*\((.*?)\)$/', $mobilInput, $matches)) {
@@ -99,30 +113,62 @@ class Pembelian extends Controller
                 'harga_jual'   => $harga * 1.15,
                 'stok'         => 0,
             ]);
-            $id_mobil = $this->mobilModel->getInsertID();
+            $id_mobil = $this->mobilModel->getInsertID(); // Gunakan getInsertID() standar CI4
         } else {
             $id_mobil = $mobil['id_mobil'];
         }
 
-        $this->model->insert([
+        // 5. Handle Upload Bukti Transfer
+        $buktiName = null;
+        if ($metode === 'transfer') {
+            $bukti = $this->request->getFile('bukti_transfer');
+            if ($bukti && $bukti->isValid() && !$bukti->hasMoved()) {
+                $buktiName = $bukti->getRandomName();
+                $bukti->move(ROOTPATH . 'public/uploads/bukti', $buktiName);
+            }
+        }
+
+        // 6. Generate Nomor Kwitansi
+        $noKwitansi = null;
+        if ($metode === 'tunai') {
+            $noKwitansi = 'PBL-' . date('Ymd') . '-' . rand(1000, 9999);
+        }
+
+        // 7. PROTEKSI AMAN ID USER (Kolom NOT NULL di Database)
+        // Mengambil ID User dari session. Jika kosong (belum login/testing), paksa ke ID 1 (Admin bawaan seeder)
+        $idUserSession = session()->get('id_user') ?? session()->get('id') ?? 1;
+
+        // 8. Proses Simpan Transaksi Pembelian
+        $insertData = [
             'id_supplier'        => $id_supplier,
             'id_mobil'           => $id_mobil,
-            'id_user'            => session()->get('id_user'),
+            'id_user'            => $idUserSession, // Dipastikan tidak NULL lagi
             'tgl_pembelian'      => $this->request->getPost('tgl_pembelian'),
             'harga_beli'         => $harga,
             'jumlah_pembelian'   => $jumlah,
             'total_harga'        => $total,
-            'metode_bayar'       => 'tunai',
-            'bukti_transfer'     => null,
-            'no_kwitansi'        => null,
-            'status_pembelian'   => 'proses',
+            'metode_bayar'       => $metode,
+            'bukti_transfer'     => $buktiName,
+            'no_kwitansi'        => $noKwitansi,
+            'status_pembelian'   => $metode === 'tunai' ? 'selesai' : 'proses',
             'keterangan_kondisi' => $this->request->getPost('keterangan_kondisi'),
-        ]);
+        ];
 
-        return redirect()->to('/pembelian')->with('success', 'Transaksi pembelian berhasil disimpan. Silakan lakukan pembayaran di menu Pembayaran Pembelian untuk memproses stok.');
+        if ($this->model->insert($insertData)) {
+            // Update stok mobil jika berhasil
+            $mobilData = $this->mobilModel->find($id_mobil);
+            if ($mobilData) {
+                $this->mobilModel->update($id_mobil, ['stok' => $mobilData['stok'] + $jumlah]);
+            }
+
+            return redirect()->to('/pembelian')->with('success', 'Transaksi pembelian berhasil disimpan.' .
+                ($metode === 'tunai' ? ' Kwitansi: ' . $noKwitansi : ' Menunggu verifikasi transfer.'));
+        } else {
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan ke database. Periksa log sistem.');
+        }
     }
 
-    public function edit(int $id): string
+    public function edit(int $id)
     {
         $pembelian = $this->model->find($id);
         if (!$pembelian) {
@@ -153,6 +199,13 @@ class Pembelian extends Controller
 
     public function selesai(int $id)
     {
-        return redirect()->to('/pembayaran_pembelian/create/' . $id);
+        $pembelian = $this->model->find($id);
+        if ($pembelian) {
+            $this->model->update($id, [
+                'status_pembelian' => 'selesai',
+                'no_kwitansi'      => 'PBL-' . date('Ymd') . '-' . rand(1000, 9999),
+            ]);
+        }
+        return redirect()->to('/pembelian')->with('success', 'Status pembelian diperbarui ke Selesai.');
     }
 }

@@ -40,7 +40,7 @@ class Auth extends Controller
         $password = $this->request->getPost('password');
 
         if (empty($username) || empty($password)) {
-            return redirect()->to(base_url('auth'))
+            return redirect()->to(base_url('login'))
                              ->with('error', 'Username dan password wajib diisi.');
         }
 
@@ -61,7 +61,7 @@ class Auth extends Controller
         }
 
         // Tidak valid: kembali ke form login
-        return redirect()->to(base_url('auth'))
+        return redirect()->to(base_url('login'))
                          ->with('error', 'Username atau password salah.');
     }
 
@@ -69,7 +69,7 @@ class Auth extends Controller
     public function logout()
     {
         session()->destroy();
-        return redirect()->to(base_url('auth'))
+        return redirect()->to(base_url('login'))
                          ->with('success', 'Anda telah berhasil logout.');
     }
 }

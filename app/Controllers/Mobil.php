@@ -75,8 +75,8 @@ class Mobil extends Controller
             'harga_beli'   => str_replace(['.', ','], '', $this->request->getPost('harga_beli')),
             'harga_jual'   => str_replace(['.', ','], '', $this->request->getPost('harga_jual')),
             'stok'         => $this->request->getPost('stok'),
-            'status_jual'  => $this->request->getPost('status_jual') ?? 'tersedia',
-            'status_mobil' => $this->request->getPost('status_mobil') ?? 'bekas',
+            'status_jual'  => $this->request->getPost('status_jual') ?: 'tersedia',
+            'status_mobil' => $this->request->getPost('status_mobil') ?: 'bekas',
             'foto'         => $fotoName,
             'keterangan'   => $this->request->getPost('keterangan'),
         ]);

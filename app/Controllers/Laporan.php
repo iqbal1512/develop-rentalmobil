@@ -55,7 +55,7 @@ class Laporan extends Controller
         return redirect()->to('/laporan/cetak/' . $idLaporan);
     }
 
-    public function cetak(int $id): string
+    public function cetak(int $id)
     {
         $laporan = $this->model->find($id);
         if (!$laporan) {

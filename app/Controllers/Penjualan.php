@@ -37,7 +37,7 @@ class Penjualan extends Controller
     }
 
     /** Buat penjualan dari pemesanan yang sudah DP */
-    public function create(int $idPemesanan): string
+    public function create(int $idPemesanan)
     {
         $pemesanan = $this->pemesananModel->getDetailWithRelasi($idPemesanan);
         if (!$pemesanan || $pemesanan['status_pemesanan'] !== 'dp_masuk') {
@@ -93,7 +93,7 @@ class Penjualan extends Controller
                          ->with('success', 'Transaksi penjualan berhasil dibuat.');
     }
 
-    public function detail(int $id): string
+    public function detail(int $id)
     {
         $penjualan = $this->model->getDetailWithRelasi($id);
         if (!$penjualan) {
@@ -108,7 +108,7 @@ class Penjualan extends Controller
         ]);
     }
 
-    public function edit(int $id): string
+    public function edit(int $id)
     {
         $penjualan = $this->model->getDetailWithRelasi($id);
         if (!$penjualan) {
