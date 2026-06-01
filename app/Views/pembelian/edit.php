@@ -50,12 +50,12 @@
       <div class="row mt-3">
         <div class="col-md-6 form-group">
           <label class="form-label">Harga Beli (Rp)</label>
-          <input type="number" name="harga_beli" class="form-control" value="<?= $pembelian['harga_beli'] ?>" min="0" required>
+          <input type="text" name="harga_beli" class="form-control mask-rupiah" value="<?= number_format($pembelian['harga_beli'], 0, '', '.') ?>" required>
         </div>
 
         <div class="col-md-6 form-group">
           <label class="form-label text-success" style="font-weight: 600;">Total Harga (Rp)</label>
-          <input type="number" name="total_harga" class="form-control text-success" style="font-weight: 600;" value="<?= $pembelian['total_harga'] ?>" min="0" required>
+          <input type="text" name="total_harga" class="form-control text-success mask-rupiah" style="font-weight: 600;" value="<?= number_format($pembelian['total_harga'], 0, '', '.') ?>" required>
         </div>
       </div>
 

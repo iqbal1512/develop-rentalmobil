@@ -69,7 +69,7 @@ class PenjualanModel extends Model
         $result = $this->selectSum('total_harga')
                        ->where('MONTH(tgl_penjualan)', date('m'))
                        ->where('YEAR(tgl_penjualan)', date('Y'))
-                       ->get()->getRowArray(); // Perbaikan: Gunakan getRowArray agar tidak error BaseConnection
+                       ->first(); // Perbaikan: Gunakan first() untuk CI4 Model
         
         return (float)($result['total_harga'] ?? 0);
     }

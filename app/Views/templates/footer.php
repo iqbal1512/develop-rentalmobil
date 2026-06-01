@@ -180,6 +180,22 @@ function formatRupiah(angka) {
     }).format(angka);
 }
 
+// Global listener for inputs with mask-rupiah class
+$(document).on('keyup', '.mask-rupiah', function(e) {
+    let cursorPostion = this.selectionStart;
+    let originalLength = this.value.length;
+    let val = this.value.replace(/[^0-9]/g, '');
+    if (val !== '') {
+        this.value = parseInt(val, 10).toLocaleString('id-ID');
+    } else {
+        this.value = '';
+    }
+    // keep cursor position relatively correct
+    let newLength = this.value.length;
+    cursorPostion = cursorPostion + (newLength - originalLength);
+    this.setSelectionRange(cursorPostion, cursorPostion);
+});
+
 // ─── Staggered Fade-in Entrance Animations ───────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     const els = document.querySelectorAll('.card, .stat-card, .table tbody tr, .car-card');

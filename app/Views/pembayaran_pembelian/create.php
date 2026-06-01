@@ -1,8 +1,7 @@
 <?php $title = 'Input Pembayaran Pembelian'; ?>
 <?= view('templates/header') ?>
 
-<div class="page-content">
-  <div class="card" style="max-width: 900px; margin: 0 auto;">
+<div class="card" style="max-width: 900px; margin: 0 auto;">
     <div class="card-header">
       <h5><i class="bi bi-wallet2" style="color: var(--primary);"></i> Input Pembayaran Pembelian</h5>
       <a href="<?= base_url('pembayaran_pembelian') ?>" class="btn btn-secondary">
@@ -66,7 +65,7 @@
           
           <div class="col-md-6 form-group">
             <label class="form-label">Jumlah Pembayaran (Rp) <span class="text-danger">*</span></label>
-            <input type="text" name="jumlah_bayar" class="form-control text-success fw-bold" value="<?= number_format($pembelian['total_harga'], 0, ',', '') ?>" readonly required>
+            <input type="text" name="jumlah_bayar" class="form-control text-success fw-bold mask-rupiah" value="<?= number_format($pembelian['total_harga'], 0, '', '.') ?>" readonly required>
             <span style="font-size: 0.75rem; color: var(--gray-500);">Lunas sesuai nominal total pembelian.</span>
           </div>
         </div>
@@ -96,8 +95,6 @@
       </form>
     </div>
   </div>
-</div>
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const metodeSelect = document.getElementById('metodeBayar');

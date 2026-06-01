@@ -65,11 +65,11 @@
         <div class="row">
             <div class="col-md-6 form-group">
                 <label class="form-label">Harga Beli Showroom (Rp) <span class="text-danger">*</span></label>
-                <input type="number" name="harga_beli" class="form-control" placeholder="0" value="<?= old('harga_beli') ?>" required>
+                <input type="text" name="harga_beli" class="form-control mask-rupiah" placeholder="0" value="<?= old('harga_beli') ? number_format(old('harga_beli'), 0, '', '.') : '' ?>" required>
             </div>
             <div class="col-md-6 form-group">
                 <label class="form-label">Harga Jual Konsumen (Rp) <span class="text-danger">*</span></label>
-                <input type="number" name="harga_jual" class="form-control" placeholder="0" value="<?= old('harga_jual') ?>" required>
+                <input type="text" name="harga_jual" class="form-control mask-rupiah" placeholder="0" value="<?= old('harga_jual') ? number_format(old('harga_jual'), 0, '', '.') : '' ?>" required>
             </div>
             <div class="col-md-6 form-group mt-3">
                 <label class="form-label">Kondisi Kendaraan</label>

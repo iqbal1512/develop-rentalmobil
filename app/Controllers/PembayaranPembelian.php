@@ -114,14 +114,7 @@ class PembayaranPembelian extends Controller
         // Sesuai Activity Diagram: Update Status Mobil "Tersedia"
         $this->mobilModel->updateStatus($pembelian['id_mobil'], 'tersedia');
 
-        // Sesuai Activity Diagram: Update Stok Mobil (tambahkan jumlah pembelian)
-        $mobil = $this->mobilModel->find($pembelian['id_mobil']);
-        if ($mobil) {
-            $newStok = $mobil['stok'] + $pembelian['jumlah_pembelian'];
-            $this->mobilModel->update($pembelian['id_mobil'], [
-                'stok' => $newStok
-            ]);
-        }
+        // Note: Stok mobil sudah ditambahkan pada saat Pembelian::store(), jadi tidak perlu ditambahkan lagi di sini.
 
         $msg = "Pembayaran pembelian berhasil disimpan. No. Kwitansi: {$noKwitansi}";
         return redirect()->to('/pembayaran_pembelian')->with('success', $msg);

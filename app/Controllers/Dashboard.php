@@ -26,6 +26,8 @@ class Dashboard extends Controller
         // Jalankan pembatalan otomatis pemesanan expired
         $pemesananModel->batalOtomatisTempo();
 
+        $allPemesanan = $pemesananModel->getAllWithRelasi();
+
         $data = [
             'title'                 => 'Dashboard',
             'total_mobil'           => $mobilModel->countAll(),
@@ -41,7 +43,7 @@ class Dashboard extends Controller
             'mobil_tersedia'        => $mobilModel->where('status_jual', 'tersedia')->countAllResults(),
             
             // Data untuk Tabel & Chart
-            'pemesanan_terbaru'     => $pemesananModel->getAllWithRelasi() ? array_slice($pemesananModel->getAllWithRelasi(), 0, 5) : [],
+            'pemesanan_terbaru'     => $allPemesanan ? array_slice($allPemesanan, 0, 5) : [],
             'pembayaran_pending'    => $pembayaranModel->getMenungguVerifikasi() ?? [],
             'chart_penjualan'       => $penjualanModel->getChartData6Bulan() ?? [],
             'status_mobil'          => $mobilModel->select('status_jual, count(*) as total')->groupBy('status_jual')->findAll(),

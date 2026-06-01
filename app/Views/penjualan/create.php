@@ -1,8 +1,8 @@
-<?= $this->extend('layout/v_template'); ?> <!-- Gunakan extend agar sidebar muncul -->
+<?php $title = 'Buat Transaksi Penjualan'; ?>
+<?= view('templates/header') ?>
 
-<?= $this->section('isi'); ?>
 <div class="row">
-    <div class="col-lg-8">
+    <div class="col-8">
         <div class="card">
             <div class="card-header">
                 <h5><i class="bi bi-file-earmark-spreadsheet" style="color: var(--primary);"></i> Buat Transaksi Penjualan</h5>
@@ -30,7 +30,7 @@
                     <div class="row mt-3">
                         <div class="col-md-6 form-group">
                             <label class="form-label text-primary">Total Sudah Dibayar (Rp)</label>
-                            <input type="number" name="total_dibayar" id="totalDibayar" class="form-control" value="<?= $pemesanan['dp_awal_dibayar'] ?>" min="0">
+                            <input type="text" name="total_dibayar" id="totalDibayar" class="form-control mask-rupiah" value="<?= $pemesanan['dp_awal_dibayar'] ? number_format($pemesanan['dp_awal_dibayar'], 0, '', '.') : '' ?>" min="0">
                             <div class="form-text">Termasuk DP awal yang sudah masuk.</div>
                         </div>
                         <div class="col-md-6 form-group">
@@ -75,7 +75,7 @@
     </div>
 
     <!-- Sidebar Info Pemesanan -->
-    <div class="col-lg-4">
+    <div class="col-4">
         <div class="card">
             <div class="card-header">
                 <h5><i class="bi bi-info-circle" style="color: var(--primary);"></i> Ringkasan</h5>
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectLunas  = document.getElementById('statusLunas');
 
     function hitungSisa() {
-        let dibayar = parseFloat(inputDibayar.value) || 0;
+        let dibayar = parseFloat(inputDibayar.value.replace(/[^0-9]/g, '')) || 0;
         let sisa = Math.max(0, totalHarga - dibayar);
         
         sisaTampil.value = new Intl.NumberFormat('id-ID').format(sisa);
@@ -131,4 +131,5 @@ document.addEventListener('DOMContentLoaded', function() {
     hitungSisa(); // Jalankan saat halaman pertama load
 });
 </script>
-<?= $this->endSection(); ?>
+
+<?= view('templates/footer') ?>

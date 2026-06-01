@@ -66,14 +66,14 @@
             <label class="form-label text-secondary">Harga Asli Mobil</label>
             <div class="input-group">
               <span class="input-group-text">Rp</span>
-              <input type="number" name="harga_jual" id="hargaJual" class="form-control" value="<?= old('harga_jual', 0) ?>" min="0" readonly style="background:#e9ecef;">
+              <input type="text" name="harga_jual" id="hargaJual" class="form-control mask-rupiah" value="<?= old('harga_jual', 0) ? number_format(old('harga_jual', 0), 0, '', '.') : '' ?>" readonly style="background:#e9ecef;">
             </div>
           </div>
           <div class="col-md-6 form-group">
             <label class="form-label text-secondary">Harga Deal (Setelah Nego) <span class="text-danger">*</span></label>
             <div class="input-group">
               <span class="input-group-text text-success fw-bold">Rp</span>
-              <input type="number" name="harga_jual_jadi" id="hargaJadi" class="form-control border-success" value="<?= old('harga_jual_jadi', 0) ?>" min="0" required>
+              <input type="text" name="harga_jual_jadi" id="hargaJadi" class="form-control border-success mask-rupiah" value="<?= old('harga_jual_jadi', 0) ? number_format(old('harga_jual_jadi', 0), 0, '', '.') : '' ?>" required>
             </div>
             <div class="form-text">Harga final yang disepakati dengan pembeli.</div>
           </div>
@@ -86,7 +86,7 @@
             <label class="form-label text-secondary">Total DP yang harus dibayar</label>
             <div class="input-group">
               <span class="input-group-text">Rp</span>
-              <input type="number" name="nominal_dp" id="nominalDp" class="form-control" value="<?= old('nominal_dp', 0) ?>" min="0">
+              <input type="text" name="nominal_dp" id="nominalDp" class="form-control mask-rupiah" value="<?= old('nominal_dp', 0) ? number_format(old('nominal_dp', 0), 0, '', '.') : '' ?>">
             </div>
             <div class="form-text text-info">Default 30% dari Harga Deal. Bisa diedit.</div>
           </div>
@@ -94,7 +94,7 @@
             <label class="form-label text-secondary">Booking Fee (Dibayar Sekarang)</label>
             <div class="input-group">
               <span class="input-group-text">Rp</span>
-              <input type="number" name="dp_awal_dibayar" id="dpAwal" class="form-control" value="<?= old('dp_awal_dibayar', 500000) ?>" min="0">
+              <input type="text" name="dp_awal_dibayar" id="dpAwal" class="form-control mask-rupiah" value="<?= old('dp_awal_dibayar', 500000) ? number_format(old('dp_awal_dibayar', 500000), 0, '', '.') : '' ?>">
             </div>
             <div class="form-text text-warning">Minimal Rp 500.000</div>
           </div>
@@ -102,7 +102,7 @@
             <label class="form-label text-secondary">Kekurangan DP (Sisa DP)</label>
             <div class="input-group">
               <span class="input-group-text text-danger fw-bold">Rp</span>
-              <input type="number" name="sisa_dp_internal" id="sisaDp" class="form-control text-danger fw-bold" value="<?= old('sisa_dp_internal', 0) ?>" readonly style="background:#ffebee; border-color: #ffcdd2;">
+              <input type="text" name="sisa_dp_internal" id="sisaDp" class="form-control text-danger fw-bold mask-rupiah" value="<?= old('sisa_dp_internal', 0) ? number_format(old('sisa_dp_internal', 0), 0, '', '.') : '' ?>" readonly style="background:#ffebee; border-color: #ffcdd2;">
             </div>
             <div class="form-text text-danger">Harus dilunasi sebelum jatuh tempo.</div>
           </div>
@@ -154,8 +154,8 @@ document.addEventListener('DOMContentLoaded', function() {
         mobilSel.addEventListener('change', function(){
             const opt = this.options[this.selectedIndex];
             const harga = opt.getAttribute('data-harga') || 0;
-            if(hargaJual) hargaJual.value = harga;
-            if(hargaJadi) hargaJadi.value = harga;
+            if(hargaJual) hargaJual.value = new Intl.NumberFormat('id-ID').format(harga);
+            if(hargaJadi) hargaJadi.value = new Intl.NumberFormat('id-ID').format(harga);
             hitungDp();
         });
     }
@@ -166,17 +166,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function hitungDp(){
         if (!hargaJadi || !nominalDp) return;
-        const jadi = parseFloat(hargaJadi.value) || 0;
+        const jadi = parseFloat(hargaJadi.value.replace(/[^0-9]/g, '')) || 0;
         const dp = Math.ceil(jadi * 0.3);
-        nominalDp.value = dp;
+        nominalDp.value = new Intl.NumberFormat('id-ID').format(dp);
         hitungSisa();
     }
 
     function hitungSisa(){
         if (!nominalDp || !dpAwal || !sisaDp) return;
-        const dp = parseFloat(nominalDp.value) || 0;
-        const bayar = parseFloat(dpAwal.value) || 0;
-        sisaDp.value = Math.max(0, dp - bayar);
+        const dp = parseFloat(nominalDp.value.replace(/[^0-9]/g, '')) || 0;
+        const bayar = parseFloat(dpAwal.value.replace(/[^0-9]/g, '')) || 0;
+        sisaDp.value = new Intl.NumberFormat('id-ID').format(Math.max(0, dp - bayar));
     }
 
     if (tglPesan && tglTempo) {

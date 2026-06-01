@@ -12,19 +12,19 @@
       <div class="row">
         <div class="col-6"><div class="form-group">
           <label class="form-label text-dark">Tanggal Penjualan</label>
-          <input type="date" name="tgl_penjualan" class="form-control bg-white text-dark border-light " value="<?= $penjualan['tgl_penjualan'] ?>" required>
+          <input type="date" name="tgl_penjualan" class="form-control bg-light text-dark border-light " value="<?= $penjualan['tgl_penjualan'] ?>" readonly>
         </div></div>
         <div class="col-6"><div class="form-group">
           <label class="form-label text-dark">Total Harga (Rp)</label>
-          <input type="number" name="total_harga" class="form-control bg-white text-dark border-light " value="<?= $penjualan['total_harga'] ?>" min="0" required>
+          <input type="text" name="total_harga" class="form-control bg-light text-dark border-light mask-rupiah" value="<?= number_format($penjualan['total_harga'], 0, '', '.') ?>" readonly>
         </div></div>
         <div class="col-6"><div class="form-group">
           <label class="form-label text-dark">Total Dibayar (Rp)</label>
-          <input type="number" name="total_dibayar" class="form-control bg-white text-dark border-light " value="<?= $penjualan['total_dibayar'] ?>" min="0">
+          <input type="text" name="total_dibayar" class="form-control bg-light text-dark border-light mask-rupiah" value="<?= number_format($penjualan['total_dibayar'], 0, '', '.') ?>" readonly>
         </div></div>
         <div class="col-6"><div class="form-group">
           <label class="form-label text-dark">Sisa Tagihan (Rp)</label>
-          <input type="number" name="sisa_tagihan" class="form-control bg-white text-dark border-light " value="<?= $penjualan['sisa_tagihan'] ?>" min="0">
+          <input type="text" name="sisa_tagihan" class="form-control bg-light text-dark border-light mask-rupiah" value="<?= number_format($penjualan['sisa_tagihan'], 0, '', '.') ?>" readonly>
         </div></div>
         <div class="col-4"><div class="form-group">
           <label class="form-label text-dark">Status Lulus</label>

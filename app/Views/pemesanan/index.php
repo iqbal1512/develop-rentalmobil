@@ -42,8 +42,6 @@
   </div>
 </div>
 
-<?= view('templates/footer') ?>
-
 <script>
 $(document).ready(function() {
     // Menghancurkan instansi lama jika ada
@@ -62,3 +60,5 @@ $(document).ready(function() {
     });
 });
 </script>
+
+<?= view('templates/footer') ?>

@@ -86,7 +86,7 @@
         <!-- Riwayat Pembayaran -->
         <div class="divider"></div>
         <h6 class="text-secondary" style="font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">Riwayat Pembayaran</h6>
-        <?php if (!empty($pembayarans)): ?>
+        <?php if (!empty($pembayaran)): ?>
         <table class="table table-hover table-hover" style="font-size:13px">
           <thead>
             <tr>
@@ -99,7 +99,7 @@
             </tr>
           </thead>
           <tbody>
-            <?php foreach ($pembayarans as $b): ?>
+            <?php foreach ($pembayaran as $b): ?>
             <tr>
               <td><?= date('d/m/Y', strtotime($b['tgl_bayar'])) ?></td>
               <td><span class="badge badge-accent"><?= ucfirst(str_replace('_',' ',$b['jenis_pembayaran'])) ?></span></td>
@@ -129,7 +129,7 @@
         <a href="<?= base_url('pembayaran/create/' . $penjualan['id_penjualan']) ?>" class="btn btn-success w-100" style="margin-bottom:10px">
           <i class="bi bi-credit-card-fill"></i> Tambah Pembayaran
         </a>
-        <?php if (empty($penyerahan)): ?>
+        <?php if (empty($penyerahan ?? null)): ?>
         <a href="<?= base_url('penyerahan/create/' . $penjualan['id_penjualan']) ?>" class="btn btn-primary w-100" style="margin-bottom:10px">
           <i class="bi bi-box-seam-fill"></i> Buat Penyerahan
         </a>

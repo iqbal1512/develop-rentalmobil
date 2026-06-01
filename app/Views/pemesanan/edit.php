@@ -32,15 +32,15 @@
         </div></div>
         <div class="col-4"><div class="form-group">
           <label class="form-label text-dark">Harga Jual Jadi (Rp)</label>
-          <input type="number" name="harga_jual_jadi" class="form-control bg-white text-dark border-light " value="<?= $pemesanan['harga_jual_jadi'] ?>" min="0" required>
+          <input type="text" name="harga_jual_jadi" class="form-control bg-white text-dark border-light mask-rupiah" value="<?= number_format($pemesanan['harga_jual_jadi'], 0, '', '.') ?>" required>
         </div></div>
         <div class="col-4"><div class="form-group">
           <label class="form-label text-dark">Nominal DP</label>
-          <input type="number" name="nominal_dp" class="form-control bg-white text-dark border-light " value="<?= $pemesanan['nominal_dp'] ?>" min="0">
+          <input type="text" name="nominal_dp" class="form-control bg-white text-dark border-light mask-rupiah" value="<?= number_format($pemesanan['nominal_dp'], 0, '', '.') ?>">
         </div></div>
         <div class="col-4"><div class="form-group">
           <label class="form-label text-dark">DP Awal Dibayar</label>
-          <input type="number" name="dp_awal_dibayar" class="form-control bg-white text-dark border-light " value="<?= $pemesanan['dp_awal_dibayar'] ?>" min="0">
+          <input type="text" name="dp_awal_dibayar" class="form-control bg-white text-dark border-light mask-rupiah" value="<?= number_format($pemesanan['dp_awal_dibayar'], 0, '', '.') ?>">
         </div></div>
         <div class="col-6"><div class="form-group">
           <label class="form-label text-dark">KTP Diterima</label>

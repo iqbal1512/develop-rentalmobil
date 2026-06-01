@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\PenjualanModel;
 use App\Models\PemesananModel;
 use App\Models\PembayaranModel;
+use App\Models\PenyerahanMobilModel;
 use CodeIgniter\Controller;
 
 /**
@@ -101,10 +102,15 @@ class Penjualan extends Controller
         }
         $pembayaran = $this->pembayaranModel->where('id_penjualan', $id)->findAll();
 
+        // Cek apakah sudah ada penyerahan mobil
+        $penyerahanModel = new PenyerahanMobilModel();
+        $penyerahan = $penyerahanModel->where('id_penjualan', $id)->first();
+
         return view('penjualan/detail', [
-            'title'     => 'Detail Penjualan',
-            'penjualan' => $penjualan,
-            'pembayaran'=> $pembayaran,
+            'title'      => 'Detail Penjualan',
+            'penjualan'  => $penjualan,
+            'pembayaran' => $pembayaran,
+            'penyerahan' => $penyerahan,
         ]);
     }
 

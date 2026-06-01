@@ -80,11 +80,11 @@
                 </div>
                 <div class="col-md-4 form-group">
                     <label class="form-label">Harga Satuan (Rp) <span class="text-danger">*</span></label>
-                    <input type="number" name="harga_beli" id="harga_beli" class="form-control" value="<?= old('harga_beli', 0) ?>" required>
+                    <input type="text" name="harga_beli" id="harga_beli" class="form-control mask-rupiah" value="<?= old('harga_beli', 0) ? number_format(old('harga_beli', 0), 0, '', '.') : '' ?>" required>
                 </div>
                 <div class="col-md-4 form-group">
                     <label class="form-label text-success" style="font-weight: 600;">Total Harga</label>
-                    <input type="number" name="total_harga" id="total_harga" class="form-control text-success" style="font-weight: 600;" readonly>
+                    <input type="text" name="total_harga" id="total_harga" class="form-control text-success mask-rupiah" style="font-weight: 600;" readonly>
                 </div>
             </div>
 
@@ -129,9 +129,9 @@
 
         function hitungTotal() {
             const qty = parseInt(qtyInput.value) || 0;
-            const harga = parseInt(hargaInput.value) || 0;
+            const harga = parseInt(hargaInput.value.replace(/[^0-9]/g, '')) || 0;
             const total = qty * harga;
-            totalInput.value = total;
+            totalInput.value = new Intl.NumberFormat('id-ID').format(total);
 
             let preview = document.getElementById('total_harga_preview');
             if (!preview) {
@@ -153,7 +153,7 @@
             if (option) {
                 const hargaDefault = option.getAttribute('data-harga');
                 if (hargaDefault) {
-                    hargaInput.value = hargaDefault;
+                    hargaInput.value = new Intl.NumberFormat('id-ID').format(hargaDefault);
                 }
             }
             hitungTotal();

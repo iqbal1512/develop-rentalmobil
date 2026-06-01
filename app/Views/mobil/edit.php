@@ -64,11 +64,11 @@
         <div class="row">
             <div class="col-md-6 form-group">
                 <label class="form-label">Harga Beli Showroom (Rp) <span class="text-danger">*</span></label>
-                <input type="number" name="harga_beli" class="form-control" value="<?= $mobil['harga_beli'] ?>" required>
+                <input type="text" name="harga_beli" class="form-control mask-rupiah" value="<?= number_format($mobil['harga_beli'], 0, '', '.') ?>" required>
             </div>
             <div class="col-md-6 form-group">
                 <label class="form-label">Harga Jual Konsumen (Rp) <span class="text-danger">*</span></label>
-                <input type="number" name="harga_jual" class="form-control" value="<?= $mobil['harga_jual'] ?>" required>
+                <input type="text" name="harga_jual" class="form-control mask-rupiah" value="<?= number_format($mobil['harga_jual'], 0, '', '.') ?>" required>
             </div>
             <div class="col-md-6 form-group mt-3">
                 <label class="form-label">Kondisi Kendaraan</label>

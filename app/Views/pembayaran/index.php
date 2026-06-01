@@ -27,8 +27,8 @@
               <th class="text-center" style="width: 50px;">#</th> <th>Customer</th> <th>Jenis</th> <th>Metode</th> <th>Tgl Bayar</th> <th>Jumlah</th> <th>Kwitansi</th> <th class="text-center">Bukti</th> <th class="text-center">Status</th> <th class="text-center">Aksi</th> </tr>
           </thead>
           <tbody>
-            <?php if (!empty($pembayarans)): ?>
-                <?php foreach ($pembayarans as $i => $b): ?>
+            <?php if (!empty($pembayaran)): ?>
+                <?php foreach ($pembayaran as $i => $b): ?>
                 <tr>
                   <td class="text-center"><?= $i + 1 ?></td> <td class="fw-bold text-dark"><?= esc($b['nama_customer'] ?? '-') ?></td> <td> <span class="badge border border-info text-info small" style="font-size: 10px;">
                         <?= strtoupper(str_replace('_',' ',$b['jenis_pembayaran'])) ?>
@@ -39,7 +39,7 @@
                     </span>
                   </td>
                   <td class="text-muted small"><?= date('d/m/Y', strtotime($b['tgl_bayar'])) ?></td> <td class="text-success fw-bold">Rp<?= number_format($b['jumlah_bayar'], 0, ',', '.') ?></td> <td class="text-muted small"><?= esc($b['no_kwitansi'] ?? '-') ?></td> <td class="text-center"> <?php if (!empty($b['bukti_transfer'])): ?>
-                    <a href="<?= base_url('uploads/pembayaran/' . $b['bukti_transfer']) ?>" target="_blank" class="btn btn-xs btn-outline-info py-0 px-2" style="font-size: 11px;">
+                    <a href="<?= base_url('uploads/bukti/' . $b['bukti_transfer']) ?>" target="_blank" class="btn btn-xs btn-outline-info py-0 px-2" style="font-size: 11px;">
                       <i class="bi bi-image"></i> Lihat
                     </a>
                     <?php else: ?>

@@ -57,7 +57,7 @@ class Laporan extends Controller
 
     public function cetak(int $id)
     {
-        $laporan = $this->model->find($id);
+        $laporan = $this->model->findWithUser($id);
         if (!$laporan) {
             return redirect()->to('/laporan')->with('error', 'Laporan tidak ditemukan.');
         }
