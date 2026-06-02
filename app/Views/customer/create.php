@@ -1,63 +1,65 @@
 <?php $title = 'Tambah Customer'; ?>
 <?= view('templates/header') ?>
 
-<div class="card" style="max-width: 900px; margin: 0 auto;">
-  <div class="card-header">
-    <h5><i class="bi bi-person-plus-fill" style="color: var(--primary);"></i> Tambah Customer Baru</h5>
-    <a href="<?= base_url('customer') ?>" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+<div class="card shadow-sm bg-white border-0 text-dark" style="max-width: 850px; margin: 0 auto;">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 border-bottom">
+    <h5 class="mb-0 fw-bold text-dark">
+      <i class="bi bi-person-plus-fill text-primary me-1"></i> Tambah Customer Baru
+    </h5>
+    <a href="<?= base_url('customer') ?>" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left"></i> Kembali
+    </a>
   </div>
-  <div class="card-body">
-    <p style="color: var(--gray-500); font-size: 0.875rem; margin-bottom: 1.5rem;">Lengkapi formulir di bawah ini untuk mencatat data customer baru.</p>
+  
+  <div class="card-body p-4">
+    <p class="text-muted small mb-4">Lengkapi formulir di bawah ini untuk mencatat data customer baru ke dalam sistem master data showroom.</p>
 
-    <form action="<?= base_url('customer/store') ?>" method="POST" enctype="multipart/form-data">
+    <?php if (session()->getFlashdata('errors')): ?>
+        <div class="alert alert-danger pb-1" role="alert">
+            <h6 class="fw-bold mb-2"><i class="bi bi-x-circle-fill me-1"></i> Gagal Menyimpan Data:</h6>
+            <ul class="mb-2" style="font-size: 13px;">
+                <?php foreach (session()->getFlashdata('errors') as $error): ?>
+                    <li><?= esc($error) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+
+    <form action="<?= base_url('customer/store') ?>" method="POST">
       <?= csrf_field() ?>
-      <div class="row">
-        <div class="col-md-6 form-group">
-          <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
-          <input type="text" name="nama" class="form-control" placeholder="Nama lengkap customer" value="<?= old('nama') ?>" required>
+      
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold text-dark mb-1">Nama Lengkap <span class="text-danger">*</span></label>
+          <input type="text" name="nama" class="form-control bg-white text-dark border-secondary" placeholder="Nama lengkap customer" value="<?= old('nama') ?>" required>
         </div>
-        <div class="col-md-6 form-group">
-          <label class="form-label">No. KTP <span class="text-danger">*</span></label>
-          <input type="text" name="no_ktp" class="form-control" placeholder="16 digit NIK" value="<?= old('no_ktp') ?>" maxlength="20" required>
+        
+        <div class="col-md-6">
+          <label class="form-label fw-semibold text-dark mb-1">No. KTP (NIK) <span class="text-danger">*</span></label>
+          <input type="text" name="no_ktp" class="form-control bg-white text-dark border-secondary font-monospace" placeholder="16 digit nomor KTP" value="<?= old('no_ktp') ?>" maxlength="16" required>
         </div>
-      </div>
-
-      <div class="row mt-3">
-        <div class="col-md-6 form-group">
-          <label class="form-label">Telepon</label>
-          <input type="text" name="telepon" class="form-control" placeholder="08..." value="<?= old('telepon') ?>">
+        
+        <div class="col-md-6">
+          <label class="form-label fw-semibold text-dark mb-1">Nomor Telepon / WA <span class="text-danger">*</span></label>
+          <input type="text" name="telepon" class="form-control bg-white text-dark border-secondary" placeholder="Contoh: 08123456789" value="<?= old('telepon') ?>" required>
         </div>
-        <div class="col-md-6 form-group">
-          <label class="form-label">Email</label>
-          <input type="email" name="email" class="form-control" placeholder="email@contoh.com" value="<?= old('email') ?>">
+        
+        <div class="col-md-6">
+          <label class="form-label fw-semibold text-dark mb-1">Alamat Email</label>
+          <input type="email" name="email" class="form-control bg-white text-dark border-secondary" placeholder="email@contoh.com" value="<?= old('email') ?>">
         </div>
-      </div>
-
-      <div class="row mt-3">
-        <div class="col-md-6 form-group">
-          <label class="form-label">Kode Pos</label>
-          <input type="text" name="no_zip" class="form-control" placeholder="12345" value="<?= old('no_zip') ?>">
-        </div>
-      </div>
-
-      <div class="row mt-3">
-        <div class="col-md-12 form-group">
-          <label class="form-label">Alamat <span class="text-danger">*</span></label>
-          <textarea name="alamat" class="form-control" rows="3" placeholder="Alamat lengkap..." required><?= old('alamat') ?></textarea>
+        
+        <div class="col-12">
+          <label class="form-label fw-semibold text-dark mb-1">Alamat Domisili KTP <span class="text-danger">*</span></label>
+          <textarea name="alamat" class="form-control bg-white text-dark border-secondary" rows="3" placeholder="Tuliskan alamat lengkap beserta RT/RW, Kelurahan, dan Kecamatan..." required><?= old('alamat') ?></textarea>
         </div>
       </div>
 
-      <div class="row mt-3">
-        <div class="col-md-12 form-group">
-          <label class="form-label">Upload Foto KTP (Opsional)</label>
-          <input type="file" name="foto_ktp" class="form-control" accept="image/*">
-          <div class="form-text text-secondary">Format: JPG, PNG, WEBP. Maks 2MB.</div>
-        </div>
-      </div>
-
-      <div class="d-flex justify-content-between align-items-center mt-4 pt-4" style="border-top: 1px solid var(--gray-200);">
-        <a href="<?= base_url('customer') ?>" class="btn btn-secondary">Batalkan</a>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle"></i> Simpan Customer</button>
+      <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+        <a href="<?= base_url('customer') ?>" class="btn btn-outline-secondary px-3">Batalkan</a>
+        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+          <i class="bi bi-check2-circle me-1"></i> Simpan Customer
+        </button>
       </div>
     </form>
   </div>

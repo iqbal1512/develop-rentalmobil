@@ -3,52 +3,45 @@
 namespace App\Controllers;
 
 use App\Models\CustomerModel;
+use App\Models\PemesananModel;
 use CodeIgniter\Controller;
 
 class Customer extends Controller
 {
     protected $model;
+    protected $pemesananModel;
 
     public function __construct()
     {
-        $this->model = new CustomerModel();
+        $this->model          = new CustomerModel();
+        $this->pemesananModel = new PemesananModel();
         helper(['form', 'url']);
     }
 
-    /** Menampilkan Data Customer */
     public function index()
     {
         return view('customer/index', [
             'title'     => 'Kelola Data Customer',
-            // PERBAIKAN: Ganti 'customer' menjadi 'customers' agar sinkron dengan View
             'customers' => $this->model->orderBy('nama', 'ASC')->findAll(),
         ]);
     }
 
-    /** Form Tambah Customer */
     public function create()
     {
         return view('customer/create', ['title' => 'Tambah Data Customer']);
     }
 
-    /** Simpan Data Baru */
     public function store()
     {
         $rules = [
-            'nama'   => 'required|max_length[100]',
-            'alamat' => 'required',
-            'no_ktp' => 'required|min_length[16]|is_unique[customer.no_ktp]',
+            'nama'    => 'required|max_length[100]|min_length[3]',
+            'alamat'  => 'required',
+            'telepon' => 'required|numeric|min_length[10]',
+            'no_ktp'  => 'required|numeric|exact_length[16]|is_unique[customer.no_ktp]',
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('error', 'Cek kembali inputan anda. No KTP mungkin sudah terdaftar.');
-        }
-
-        $fotoKtpName = null;
-        $foto = $this->request->getFile('foto_ktp');
-        if ($foto && $foto->isValid() && !$foto->hasMoved()) {
-            $fotoKtpName = $foto->getRandomName();
-            $foto->move(ROOTPATH . 'public/uploads/ktp', $fotoKtpName);
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $this->model->insert([
@@ -57,19 +50,16 @@ class Customer extends Controller
             'telepon' => $this->request->getPost('telepon'),
             'no_ktp'  => $this->request->getPost('no_ktp'),
             'email'   => $this->request->getPost('email'),
-            'no_zip'  => $this->request->getPost('no_zip'),
-            'foto_ktp'=> $fotoKtpName,
         ]);
 
-        return redirect()->to(base_url('customer'))->with('success', 'Customer berhasil ditambahkan.');
+        return redirect()->to(base_url('customer'))->with('success', 'Customer baru berhasil didaftarkan.');
     }
 
-    /** Form Edit Customer */
     public function edit($id)
     {
         $customer = $this->model->find($id);
         if (!$customer) {
-            return redirect()->to(base_url('customer'))->with('error', 'Data tidak ditemukan.');
+            return redirect()->to(base_url('customer'))->with('error', 'Data customer tidak ditemukan.');
         }
         return view('customer/edit', [
             'title'    => 'Edit Data Customer', 
@@ -77,43 +67,39 @@ class Customer extends Controller
         ]);
     }
 
-    /** Update Data */
     public function update($id)
     {
-        $data = [
+        $rules = [
+            'nama'    => 'required|max_length[100]|min_length[3]',
+            'alamat'  => 'required',
+            'telepon' => 'required|numeric|min_length[10]',
+            'no_ktp'  => "required|numeric|exact_length[16]|is_unique[customer.no_ktp,id_customer,{$id}]",
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $this->model->update($id, [
             'nama'    => $this->request->getPost('nama'),
             'alamat'  => $this->request->getPost('alamat'),
             'telepon' => $this->request->getPost('telepon'),
             'no_ktp'  => $this->request->getPost('no_ktp'),
             'email'   => $this->request->getPost('email'),
-            'no_zip'  => $this->request->getPost('no_zip'),
-        ];
+        ]);
 
-        $foto = $this->request->getFile('foto_ktp');
-        if ($foto && $foto->isValid() && !$foto->hasMoved()) {
-            $fotoKtpName = $foto->getRandomName();
-            $foto->move(ROOTPATH . 'public/uploads/ktp', $fotoKtpName);
-            $data['foto_ktp'] = $fotoKtpName;
-            
-            // Opsional: Hapus foto lama
-            $oldCustomer = $this->model->find($id);
-            if ($oldCustomer && !empty($oldCustomer['foto_ktp'])) {
-                $oldPath = ROOTPATH . 'public/uploads/ktp/' . $oldCustomer['foto_ktp'];
-                if (file_exists($oldPath)) {
-                    unlink($oldPath);
-                }
-            }
-        }
-
-        $this->model->update($id, $data);
-
-        return redirect()->to(base_url('customer'))->with('success', 'Data customer diperbarui.');
+        return redirect()->to(base_url('customer'))->with('success', 'Data profil customer berhasil diperbarui.');
     }
 
-    /** Hapus Data */
     public function delete($id)
     {
+        $cekRelasiTransaksi = $this->pemesananModel->where('id_customer', $id)->first();
+
+        if ($cekRelasiTransaksi) {
+            return redirect()->to(base_url('customer'))->with('error', 'Data customer gagal dihapus! Data ini sedang digunakan dalam transaksi pemesanan.');
+        }
+
         $this->model->delete($id);
-        return redirect()->to(base_url('customer'))->with('success', 'Data customer dihapus.');
+        return redirect()->to(base_url('customer'))->with('success', 'Data customer berhasil dihapus dari sistem.');
     }
 }

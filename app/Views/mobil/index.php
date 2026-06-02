@@ -175,11 +175,6 @@
   /* ── GRID KARTU ──────────────────────────── */
   .sm-grid {
     display: grid;
-    /*
-      auto-fill = isi sebanyak mungkin kolom
-      minmax(240px, 1fr) = min 240px, max sama rata
-      Ini memastikan card tidak terlalu lebar/sempit
-    */
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: var(--gap-grid);
     padding: 20px 24px 0;
@@ -192,7 +187,7 @@
     border-radius: var(--radius-card);
     overflow: hidden;
     display: flex;
-    flex-direction: column; /* ← kunci: flex column */
+    flex-direction: column;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
   }
 
@@ -203,27 +198,22 @@
   }
 
   /* ── FOTO WRAPPER ────────────────────────── */
-  /*
-    padding-top: var(--img-ratio) = rasio aspek tetap.
-    Semua gambar besar/kecil akan di-crop ke ukuran
-    yang SAMA tanpa meluber ke card lain.
-  */
   .sm-img-wrap {
     position: relative;
     width: 100%;
     padding-top: var(--img-ratio);
     background: #f0f4f8;
-    overflow: hidden;   /* ← crop otomatis */
-    flex-shrink: 0;     /* ← jangan pernah menyusut */
+    overflow: hidden;
+    flex-shrink: 0;
   }
 
   .sm-img-wrap img {
     position: absolute;
-    inset: 0;           /* top:0; right:0; bottom:0; left:0 */
+    inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;          /* crop tanpa distorsi */
-    object-position: center;    /* fokus ke tengah */
+    object-fit: cover;
+    object-position: center;
     display: block;
     transition: transform 0.45s ease;
   }
@@ -232,7 +222,6 @@
     transform: scale(1.05);
   }
 
-  /* Placeholder saat tidak ada foto */
   .sm-img-placeholder {
     position: absolute;
     inset: 0;
@@ -247,7 +236,6 @@
   .sm-img-placeholder i { font-size: 32px; }
   .sm-img-placeholder span { font-size: 11px; font-weight: 600; }
 
-  /* Badge jumlah foto (atas kiri) */
   .sm-img-count {
     position: absolute;
     top: 9px;
@@ -265,7 +253,6 @@
     z-index: 2;
   }
 
-  /* Badge status (bawah kanan) */
   .sm-status {
     position: absolute;
     bottom: 9px;
@@ -287,13 +274,12 @@
   /* ── BODY KARTU ──────────────────────────── */
   .sm-body {
     padding: 13px 14px 11px;
-    flex: 1;            /* ← body mengisi sisa ruang */
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0;
   }
 
-  /* Harga */
   .sm-price-label {
     font-size: 10px;
     font-weight: 600;
@@ -317,14 +303,13 @@
     margin-bottom: 9px;
   }
 
-  /* Nama & tipe */
   .sm-car-name {
     font-size: 14px;
     font-weight: 700;
     color: #1a202c;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;   /* ← nama panjang tidak merusak layout */
+    text-overflow: ellipsis;
     margin-bottom: 2px;
   }
 
@@ -334,12 +319,11 @@
     margin-bottom: 10px;
   }
 
-  /* Spesifikasi grid 2 kolom */
   .sm-specs {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 5px 8px;
-    margin-top: auto;         /* ← spec selalu menempel ke bawah body */
+    margin-top: auto;
     padding-top: 10px;
     border-top: 1px solid #f1f5f9;
   }
@@ -373,7 +357,7 @@
     background: #f8fafc;
     display: flex;
     gap: 7px;
-    flex-shrink: 0;   /* ← footer selalu di bawah, tidak terkompresi */
+    flex-shrink: 0;
   }
 
   .sm-btn {
@@ -429,7 +413,6 @@
   .sm-empty h5 { font-size: 16px; font-weight: 700; color: #4a5568; margin-bottom: 6px; }
   .sm-empty p { font-size: 13px; }
 
-  /* ── COUNT BADGE ─────────────────────────── */
   .sm-count {
     display: inline-block;
     background: var(--accent);
@@ -442,7 +425,6 @@
     vertical-align: middle;
   }
 
-  /* ── RESPONSIF ───────────────────────────── */
   @media (max-width: 600px) {
     .sm-grid { padding: 12px 12px 0; gap: 12px; }
     .sm-header { padding: 16px 12px 8px; }
@@ -452,7 +434,6 @@
 
 <div class="sm-page">
 
-  <!-- HEADER -->
   <div class="sm-header">
     <div class="sm-header-left">
       <nav aria-label="breadcrumb">
@@ -474,10 +455,23 @@
     </a>
   </div>
 
-  <!-- TOOLBAR FILTER & SEARCH -->
-  <div class="sm-toolbar">
+  <div class="px-4 mt-2">
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> <?= session()->getFlashdata('success') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
 
-    <!-- Search -->
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> <?= session()->getFlashdata('error') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+  </div>
+
+  <div class="sm-toolbar">
     <div class="sm-search-wrap">
       <i class="bi bi-search"></i>
       <input
@@ -488,7 +482,6 @@
       >
     </div>
 
-    <!-- Filter Status -->
     <div class="sm-filter-btns">
       <button class="sm-filter-btn active" data-filter="all">Semua</button>
       <button class="sm-filter-btn" data-filter="tersedia">Tersedia</button>
@@ -496,7 +489,6 @@
       <button class="sm-filter-btn" data-filter="terjual">Terjual</button>
     </div>
 
-    <!-- Sort -->
     <select class="sm-sort" id="smSort">
       <option value="">Urutkan</option>
       <option value="harga_asc">Harga Terendah</option>
@@ -504,10 +496,8 @@
       <option value="tahun_desc">Tahun Terbaru</option>
       <option value="nama_asc">Nama A–Z</option>
     </select>
-
   </div>
 
-  <!-- GRID KARTU -->
   <?php if (empty($mobils)): ?>
     <div class="sm-grid">
       <div class="sm-empty">
@@ -540,43 +530,32 @@
            data-harga="<?= (int)$m['harga_jual'] ?>"
            data-tahun="<?= (int)($m['tahun'] ?? 0) ?>">
 
-        <!-- FOTO -->
         <div class="sm-img-wrap">
-
-          <!-- Badge jumlah foto -->
           <div class="sm-img-count">
             <i class="bi bi-camera"></i>
             <?= !empty($m['foto']) ? '1' : '0' ?>
           </div>
 
-          <!-- Badge status -->
           <div class="sm-status <?= $statusClass ?>">
             <?= $statusText ?>
           </div>
 
           <?php if (!empty($m['foto'])): ?>
-            <!-- Foto asli — object-fit:cover crop otomatis, tidak tumpang tindih -->
             <img
               src="<?= base_url('uploads/mobil/' . $m['foto']) ?>"
               alt="<?= esc($m['nama_mobil']) ?>"
               loading="lazy"
             >
           <?php else: ?>
-            <!-- Placeholder jika tidak ada foto -->
             <div class="sm-img-placeholder">
               <i class="bi bi-car-front"></i>
               <span><?= esc($m['vendor']) ?></span>
             </div>
           <?php endif; ?>
-
         </div>
-        <!-- /FOTO -->
 
-        <!-- BODY -->
         <div class="sm-body">
-
-          <!-- Harga -->
-          <div class="sm-price-label">Harga Cash</div>
+          <div class="sm-price-label">Harga Jual Cash</div>
           <div class="sm-price-main">
             Rp <?= number_format($m['harga_jual'], 0, ',', '.') ?>
           </div>
@@ -584,7 +563,6 @@
             Beli: Rp <?= number_format($m['harga_beli'], 0, ',', '.') ?>
           </div>
 
-          <!-- Nama & Tipe -->
           <div class="sm-car-name" title="<?= esc($m['nama_mobil']) ?>">
             <?= esc($m['nama_mobil']) ?>
           </div>
@@ -592,7 +570,6 @@
             <?= esc($m['tipe']) ?> &bull; <?= ucfirst(esc($m['status_mobil'])) ?>
           </div>
 
-          <!-- Spesifikasi -->
           <div class="sm-specs">
             <div class="sm-spec">
               <i class="bi bi-tag"></i>
@@ -610,12 +587,13 @@
               <i class="bi bi-hash"></i>
               <span><?= esc($m['no_polisi'] ?? '-') ?></span>
             </div>
+            <div class="sm-spec col-12 mt-1 border-top pt-1 border-light">
+              <i class="bi bi-truck text-secondary"></i>
+              <span class="text-muted small">Spl: <?= esc($m['nama_supplier'] ?? 'Umum/Unknown') ?></span>
+            </div>
           </div>
-
         </div>
-        <!-- /BODY -->
 
-        <!-- FOOTER TOMBOL -->
         <div class="sm-foot">
           <a href="<?= base_url('mobil/edit/' . $m['id_mobil']) ?>" class="sm-btn sm-btn-edit">
             <i class="bi bi-pencil-square"></i> Edit
@@ -626,43 +604,38 @@
             <i class="bi bi-trash"></i> Hapus
           </button>
         </div>
-        <!-- /FOOTER -->
-
       </div>
-      <!-- /sm-card -->
-
       <?php endforeach; ?>
     </div>
-    <!-- /sm-grid -->
-
   <?php endif; ?>
 
-</div><!-- /sm-page -->
-
+</div>
 
 <script>
+/* PERBAIKAN: Menyediakan fungsi Interlock Interaksi Hapus Data */
+function confirmDelete(deleteUrl) {
+    if (confirm("Apakah Anda yakin ingin menghapus data unit mobil ini permanen dari sistem showroom?")) {
+        window.location.href = deleteUrl;
+    }
+}
+
 (function () {
-  /* ── Referensi elemen ── */
   var searchEl  = document.getElementById('smSearch');
   var sortEl    = document.getElementById('smSort');
   var countEl   = document.getElementById('smCount');
   var grid      = document.getElementById('smGrid');
 
-  if (!grid) return; // halaman kosong, tidak ada grid
+  if (!grid) return; 
 
   var filterBtns = document.querySelectorAll('.sm-filter-btn');
 
-  /* ── State ── */
   var currentFilter = 'all';
   var currentSearch = '';
   var currentSort   = '';
 
-  /* ── Ambil semua item sekali ── */
   var allItems = Array.from(grid.querySelectorAll('.car-item'));
 
-  /* ── Fungsi utama: filter + sort + render ── */
   function applyAll() {
-    // 1. Filter
     var visible = allItems.filter(function (el) {
       var status = el.dataset.status || '';
       var text   = (el.dataset.nama + ' ' + el.dataset.vendor + ' ' + el.dataset.tipe).toLowerCase();
@@ -673,7 +646,6 @@
       return matchFilter && matchSearch;
     });
 
-    // 2. Sort
     if (currentSort) {
       visible.sort(function (a, b) {
         switch (currentSort) {
@@ -691,19 +663,15 @@
       });
     }
 
-    // 3. Tampilkan / sembunyikan
     allItems.forEach(function (el) { el.style.display = 'none'; });
     visible.forEach(function (el) { el.style.display = ''; });
 
-    // Reorder DOM sesuai urutan sort
     visible.forEach(function (el) { grid.appendChild(el); });
 
-    // 4. Update count badge
     if (countEl) {
       countEl.textContent = visible.length + ' unit';
     }
 
-    // 5. Empty state
     var existingEmpty = grid.querySelector('.sm-empty-runtime');
     if (visible.length === 0) {
       if (!existingEmpty) {
@@ -718,13 +686,11 @@
     }
   }
 
-  /* ── Event: search ── */
   searchEl && searchEl.addEventListener('input', function () {
     currentSearch = this.value.toLowerCase().trim();
     applyAll();
   });
 
-  /* ── Event: filter buttons ── */
   filterBtns.forEach(function (btn) {
     btn.addEventListener('click', function () {
       filterBtns.forEach(function (b) { b.classList.remove('active'); });
@@ -734,14 +700,11 @@
     });
   });
 
-  /* ── Event: sort ── */
   sortEl && sortEl.addEventListener('change', function () {
     currentSort = this.value;
     applyAll();
   });
-
 })();
 </script>
-
 
 <?= view('templates/footer') ?>

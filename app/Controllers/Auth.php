@@ -23,6 +23,7 @@ class Auth extends Controller
         helper(['form', 'url']);
     }
 
+    
     /** Tampilkan form login */
     public function index()
     {

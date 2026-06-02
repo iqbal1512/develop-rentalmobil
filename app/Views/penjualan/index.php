@@ -51,7 +51,7 @@
                     <small class="text-muted"><?= esc($p['tipe'] ?? '-') ?> / <?= esc($p['warna'] ?? '-') ?></small>
                   </td>
                   <td class="text-muted"><?= date('d/m/Y', strtotime($p['tgl_penjualan'])) ?></td>
-                  <td class="fw-semibold text-dark">Rp<?= number_format($p['total_harga'], 0, ',', '.') ?></td>
+                  <td class="fw-semibold text-dark">Rp<?= number_format($p['total_tagihan'], 0, ',', '.') ?></td>
                   <td class="text-success fw-semibold">Rp<?= number_format($p['total_dibayar'], 0, ',', '.') ?></td>
                   <td class="<?= $p['sisa_tagihan'] > 0 ? 'text-danger fw-bold' : 'text-success fw-semibold' ?>">
                     Rp<?= number_format($p['sisa_tagihan'], 0, ',', '.') ?>
@@ -116,4 +116,4 @@
   </div>
 </div>
 
-<?= view('templates/header') ?>
+<?= view('templates/footer') ?>

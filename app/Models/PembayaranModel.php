@@ -4,43 +4,44 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-/**
- * PembayaranPenjualanModel
- * Mengelola arus kas masuk (pembayaran dari customer atas unit kendaraan)
- * Sinkron dengan Database: db_showroom_mobil
- */
-class PembayaranPenjualanModel extends Model
+class PembayaranModel extends Model
 {
-    protected $table            = 'pembayaran'; // Tetap menggunakan tabel pembayaran utama
+    protected $table            = 'pembayaran_penjualan'; // FIXED: Sesuai DB
     protected $primaryKey       = 'id_pembayaran';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
+
+    // FIELD SUDAH DISESUAIKAN 100% SAMA SCREENSHOT DB KAMU
     protected $allowedFields    = [
-        'id_pemesanan', 'id_penjualan', 'id_user', 'jenis_pembayaran',
-        'metode_bayar', 'tgl_bayar', 'jumlah_bayar', 'bukti_transfer',
-        'no_kwitansi', 'status_verifikasi', 'keterangan'
+        'id_pemesanan',
+        'id_penjualan',
+        'jenis_pembayaran',
+        'metode_pembayaran', // FIXED: Di DB kamu namanya metode_pembayaran (bukan metode_bayar)
+        'tgl_bayar',
+        'jumlah_bayar',
+        'bukti_tf',          
+        'status_verifikasi', 
+        'status_refund'      
     ];
 
-    // Format Waktu
-    protected $useTimestamps = true;
-    protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
+    // Format Waktu (Pindahkan ke dalam class agar tidak parse error)
+    protected $useTimestamps = false; 
 
     /**
      * Ambil semua data pembayaran masuk beserta relasi data customer dan unit mobil
      */
     public function getAllWithRelasi(): array
     {
-        return $this->select('pembayaran.*, customer.nama as nama_customer, 
-                              mobil.nama_mobil, users.nama as nama_user, 
-                              penjualan.total_harga')
-                    ->join('pemesanan', 'pemesanan.id_pemesanan = pembayaran.id_pemesanan', 'left')
-                    ->join('penjualan', 'penjualan.id_penjualan = pembayaran.id_penjualan', 'left')
+        // PERBAIKAN: Semua alias tabel 'pembayaran' diganti ke 'pembayaran_penjualan'
+        // Kolom 'penjualan.total_harga' disesuaikan jika nanti ada penyesuaian di tabel penjualan
+        return $this->select('pembayaran_penjualan.*, customer.nama as nama_customer, 
+                             mobil.nama_mobil, penjualan.total_tagihan')
+                    ->join('pemesanan', 'pemesanan.id_pemesanan = pembayaran_penjualan.id_pemesanan', 'left')
+                    ->join('penjualan', 'penjualan.id_penjualan = pembayaran_penjualan.id_penjualan', 'left')
                     ->join('customer',  'customer.id_customer = pemesanan.id_customer',     'left')
                     ->join('mobil',     'mobil.id_mobil = pemesanan.id_mobil',              'left')
-                    ->join('users',     'users.id_user = pembayaran.id_user',               'left')
-                    ->orderBy('pembayaran.tgl_bayar', 'DESC')
+                    ->orderBy('pembayaran_penjualan.tgl_bayar', 'DESC')
                     ->findAll();
     }
 
@@ -49,32 +50,32 @@ class PembayaranPenjualanModel extends Model
      */
     public function getMenungguVerifikasi(): array
     {
-        return $this->select('pembayaran.*, customer.nama as nama_customer, mobil.nama_mobil')
-                    ->join('pemesanan', 'pemesanan.id_pemesanan = pembayaran.id_pemesanan', 'left')
+        // PERBAIKAN: Mengganti 'pembayaran.status_verifikasi' menjadi 'pembayaran_penjualan.status_verifikasi'
+        // PERBAIKAN: Mengganti 'pembayaran.metode_bayar' menjadi 'pembayaran_penjualan.metode_pembayaran' (sesuai DB)
+        return $this->select('pembayaran_penjualan.*, customer.nama as nama_customer, mobil.nama_mobil')
+                    ->join('pemesanan', 'pemesanan.id_pemesanan = pembayaran_penjualan.id_pemesanan', 'left')
                     ->join('customer',  'customer.id_customer = pemesanan.id_customer',     'left')
                     ->join('mobil',     'mobil.id_mobil = pemesanan.id_mobil',              'left')
-                    ->where('pembayaran.status_verifikasi', 'menunggu')
-                    ->where('pembayaran.metode_bayar', 'transfer')
+                    ->where('pembayaran_penjualan.status_verifikasi', 'menunggu')
+                    ->where('pembayaran_penjualan.metode_pembayaran', 'transfer')
                     ->findAll();
     }
 
     /**
      * Menghitung total dana masuk yang sah (Terverifikasi) per lembar penjualan
-     * PERBAIKAN LOGIKA: Uang yang berstatus 'menunggu' verifikasi transfer 
-     * TIDAK BOLEH ikut terjumlah sebagai saldo pelunasan.
      */
     public function getTotalBayarByPenjualan(int $idPenjualan): float
     {
         $result = $this->selectSum('jumlah_bayar')
                        ->where('id_penjualan', $idPenjualan)
-                       ->where('status_verifikasi', 'terverifikasi') // HANYA hitung dana yang sudah sah/klir
+                       ->where('status_verifikasi', 'terverifikasi') 
                        ->first();
         
         return (float)($result['jumlah_bayar'] ?? 0);
     }
 
     /**
-     * Otomatis membuat format nomor kwitansi unik showroom (Contoh: KWT-20260602-0001)
+     * Otomatis membuat format nomor kwitansi unik showroom
      */
     public function generateNoKwitansi(): string
     {
@@ -90,14 +91,15 @@ class PembayaranPenjualanModel extends Model
      */
     public function getLaporan(string $tglMulai, string $tglAkhir): array
     {
-        return $this->select('pembayaran.*, customer.nama as nama_customer, mobil.nama_mobil')
-                    ->join('pemesanan', 'pemesanan.id_pemesanan = pembayaran.id_pemesanan', 'left')
+        // PERBAIKAN: Menyelaraskan seluruh prefix tabel 'pembayaran' menjadi 'pembayaran_penjualan'
+        return $this->select('pembayaran_penjualan.*, customer.nama as nama_customer, mobil.nama_mobil')
+                    ->join('pemesanan', 'pemesanan.id_pemesanan = pembayaran_penjualan.id_pemesanan', 'left')
                     ->join('customer',  'customer.id_customer = pemesanan.id_customer',     'left')
                     ->join('mobil',     'mobil.id_mobil = pemesanan.id_mobil',              'left')
-                    ->where('pembayaran.tgl_bayar >=', $tglMulai)
-                    ->where('pembayaran.tgl_bayar <=', $tglAkhir)
-                    ->where('pembayaran.status_verifikasi', 'terverifikasi') // Laporan hanya mencatat uang riil yang sah
-                    ->orderBy('pembayaran.tgl_bayar', 'ASC')
+                    ->where('pembayaran_penjualan.tgl_bayar >=', $tglMulai)
+                    ->where('pembayaran_penjualan.tgl_bayar <=', $tglAkhir)
+                    ->where('pembayaran_penjualan.status_verifikasi', 'terverifikasi') 
+                    ->orderBy('pembayaran_penjualan.tgl_bayar', 'ASC')
                     ->findAll();
     }
-}
+} // Tanda penutup class SEHARUSNYA di paling bawah ini!

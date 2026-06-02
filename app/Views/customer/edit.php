@@ -1,56 +1,64 @@
 <?php $title = 'Edit Customer'; ?>
 <?= view('templates/header') ?>
 
-<div class="card shadow-sm bg-white border-light text-dark" style="max-width:700px;margin:0 auto">
-  <div class="card-header bg-white border-light text-white">
-    <h5><i class="bi bi-pencil-square text-warning"></i> Edit Customer</h5>
-    <a href="<?= base_url('customer') ?>" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i> Kembali</a>
+<div class="card shadow-sm bg-white border-0 text-dark" style="max-width: 750px; margin: 0 auto">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 border-bottom">
+    <h5 class="mb-0 fw-bold text-dark">
+      <i class="bi bi-pencil-square text-warning me-1"></i> Edit Data Customer
+    </h5>
+    <a href="<?= base_url('customer') ?>" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left"></i> Kembali
+    </a>
   </div>
-  <div class="card-body">
-    <form action="<?= base_url('customer/update/' . $customer['id_customer']) ?>" method="POST" enctype="multipart/form-data">
+  
+  <div class="card-body p-4">
+    
+    <?php if (session()->getFlashdata('errors')): ?>
+        <div class="alert alert-danger pb-1" role="alert">
+            <h6 class="fw-bold mb-2"><i class="bi bi-x-circle-fill me-1"></i> Perubahan Gagal Disimpan:</h6>
+            <ul class="mb-2" style="font-size: 13px;">
+                <?php foreach (session()->getFlashdata('errors') as $error): ?>
+                    <li><?= esc($error) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+
+    <form action="<?= base_url('customer/update/' . $customer['id_customer']) ?>" method="POST">
       <?= csrf_field() ?>
-      <div class="row">
-        <div class="col-6"><div class="form-group">
-          <label class="form-label text-dark">Nama Lengkap</label>
-          <input type="text" name="nama" class="form-control bg-white text-dark border-light " value="<?= esc($customer['nama']) ?>" required>
-        </div></div>
-        <div class="col-6"><div class="form-group">
-          <label class="form-label text-dark">No. KTP</label>
-          <input type="text" name="no_ktp" class="form-control bg-white text-dark border-light " value="<?= esc($customer['no_ktp']) ?>" required>
-        </div></div>
-        <div class="col-6"><div class="form-group">
-          <label class="form-label text-dark">Telepon</label>
-          <input type="text" name="telepon" class="form-control bg-white text-dark border-light " value="<?= esc($customer['telepon'] ?? '') ?>">
-        </div></div>
-        <div class="col-6"><div class="form-group">
-          <label class="form-label text-dark">Email</label>
-          <input type="email" name="email" class="form-control bg-white text-dark border-light " value="<?= esc($customer['email'] ?? '') ?>">
-        </div></div>
-        <div class="col-6"><div class="form-group">
-          <label class="form-label text-dark">Kode Pos</label>
-          <input type="text" name="no_zip" class="form-control bg-white text-dark border-light " value="<?= esc($customer['no_zip'] ?? '') ?>">
-        </div></div>
-        <div class="col-12"><div class="form-group">
-          <label class="form-label text-dark">Alamat</label>
-          <textarea name="alamat" class="form-control bg-white text-dark border-light " rows="3" required><?= esc($customer['alamat']) ?></textarea>
-        </div></div>
+      
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold text-dark mb-1">Nama Lengkap</label>
+          <input type="text" name="nama" class="form-control bg-white text-dark border-secondary" value="<?= esc($customer['nama']) ?>" required>
+        </div>
         
-        <div class="col-12"><div class="form-group mt-2">
-          <label class="form-label text-dark">Upload Foto KTP Baru (Opsional)</label>
-          <input type="file" name="foto_ktp" class="form-control bg-white text-dark border-light " accept="image/*">
-          <div class="form-text text-secondary">Abaikan jika tidak ingin mengubah foto. Format: JPG, PNG, WEBP. Maks 2MB.</div>
-          
-          <?php if (!empty($customer['foto_ktp'])): ?>
-            <div class="mt-3">
-              <span class="d-block text-secondary mb-1">Foto Saat Ini:</span>
-              <img src="<?= base_url('uploads/ktp/' . $customer['foto_ktp']) ?>" alt="KTP" style="max-height: 150px; border-radius: 8px; border: 1px solid var(--border)">
-            </div>
-          <?php endif; ?>
-        </div></div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold text-dark mb-1">No. KTP (16 Digit)</label>
+          <input type="text" name="no_ktp" class="form-control bg-white text-dark border-secondary font-monospace" value="<?= esc($customer['no_ktp']) ?>" maxlength="16" required>
+        </div>
+        
+        <div class="col-md-6">
+          <label class="form-label fw-semibold text-dark mb-1">Nomor Telepon / WA</label>
+          <input type="text" name="telepon" class="form-control bg-white text-dark border-secondary" value="<?= esc($customer['telepon'] ?? '') ?>" required>
+        </div>
+        
+        <div class="col-md-6">
+          <label class="form-label fw-semibold text-dark mb-1">Alamat Email</label>
+          <input type="email" name="email" class="form-control bg-white text-dark border-secondary" value="<?= esc($customer['email'] ?? '') ?>">
+        </div>
+        
+        <div class="col-12">
+          <label class="form-label fw-semibold text-dark mb-1">Alamat Domisili KTP</label>
+          <textarea name="alamat" class="form-control bg-white text-dark border-secondary" rows="3" required><?= esc($customer['alamat']) ?></textarea>
+        </div>
       </div>
-      <div class="d-flex justify-content-end gap-2" style="margin-top:8px">
-        <a href="<?= base_url('customer') ?>" class="btn btn-secondary">Batal</a>
-        <button type="submit" class="btn btn-warning"><i class="bi bi-save2"></i> Update Customer</button>
+
+      <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+        <a href="<?= base_url('customer') ?>" class="btn btn-outline-secondary px-3">Batal</a>
+        <button type="submit" class="btn btn-warning px-4 fw-semibold text-dark">
+          <i class="bi bi-check2-circle me-1"></i> Simpan Perubahan
+        </button>
       </div>
     </form>
   </div>

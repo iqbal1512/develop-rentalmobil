@@ -65,16 +65,20 @@ class PenjualanModel extends Model
     /**
      * Total pendapatan bulan ini (Berdasarkan total_harga di DB kamu)
      */
+    /**
+     * Total pendapatan bulan ini 
+     * PERBAIKAN: Mengganti total_harga menjadi total_tagihan sesuai database
+     */
     public function totalPendapatanBulanIni(): float
     {
-        $result = $this->selectSum('total_harga')
+        // Ganti 'total_harga' menjadi 'total_tagihan'
+        $result = $this->selectSum('total_tagihan', 'total_pendapatan')
                        ->where('MONTH(tgl_penjualan)', date('m'))
                        ->where('YEAR(tgl_penjualan)', date('Y'))
                        ->first();
         
-        return (float)($result['total_harga'] ?? 0);
+        return (float)($result['total_pendapatan'] ?? 0);
     }
-
     /**
      * Data Grafik Penjualan 6 Bulan Terakhir
      */
