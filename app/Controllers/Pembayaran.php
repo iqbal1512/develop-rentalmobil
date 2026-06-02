@@ -10,9 +10,9 @@ use CodeIgniter\Controller;
 
 /**
  * Pembayaran Controller
- * Proses bisnis:
- * - Tunai: langsung Kwitansi
- * - Transfer: input bukti -> admin verifikasi -> Kwitansi
+ * Proses bisnis terintegrasi Showroom Mobil:
+ * - Tunai: langsung terbit Kwitansi, potong sisa tagihan penjualan.
+ * - Transfer: input bukti -> status pending -> admin verifikasi -> potong sisa tagihan & terbit Kwitansi.
  */
 class Pembayaran extends Controller
 {
@@ -54,22 +54,22 @@ class Pembayaran extends Controller
     public function store()
     {
         $rules = [
-            'id_penjualan'    => 'required|integer',
-            'id_pemesanan'    => 'required|integer',
-            'jenis_pembayaran'=> 'required|in_list[bukti_pesan,dp,pelunasan,cicilan]',
-            'metode_bayar'    => 'required|in_list[tunai,transfer]',
-            'tgl_bayar'       => 'required|valid_date',
-            'jumlah_bayar'    => 'required',
+            'id_penjualan'     => 'required|integer',
+            'id_pemesanan'     => 'required|integer',
+            'jenis_pembayaran' => 'required|in_list[bukti_pesan,dp,pelunasan,cicilan]',
+            'metode_bayar'     => 'required|in_list[tunai,transfer]',
+            'tgl_bayar'        => 'required|valid_date',
+            'jumlah_bayar'     => 'required',
         ];
 
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $metode    = $this->request->getPost('metode_bayar');
-        $jumlah    = (float) str_replace([',', '.'], '', $this->request->getPost('jumlah_bayar'));
+        $metode = $this->request->getPost('metode_bayar');
+        $jumlah = (float) str_replace([',', '.'], '', $this->request->getPost('jumlah_bayar'));
 
-        // Handle bukti transfer
+        // Handle file upload bukti transfer
         $buktiName = null;
         if ($metode === 'transfer') {
             $bukti = $this->request->getFile('bukti_transfer');
@@ -79,7 +79,7 @@ class Pembayaran extends Controller
             }
         }
 
-        // Kwitansi langsung untuk tunai
+        // Penentuan nomor kwitansi otomatis khusus pembayaran tunai langsung
         $noKwitansi  = null;
         $statusVerif = 'menunggu';
         if ($metode === 'tunai') {
@@ -89,6 +89,7 @@ class Pembayaran extends Controller
 
         $idPenjualan = (int) $this->request->getPost('id_penjualan');
 
+        // Insert data transaksi kas masuk
         $this->model->insert([
             'id_pemesanan'      => $this->request->getPost('id_pemesanan'),
             'id_penjualan'      => $idPenjualan,
@@ -103,42 +104,24 @@ class Pembayaran extends Controller
             'keterangan'        => $this->request->getPost('keterangan'),
         ]);
 
-        // Update total dibayar & cek lunas di penjualan
-        $penjualan = $this->penjualanModel->find($idPenjualan);
-        if ($penjualan) {
-            $totalDibayar = $this->model->getTotalBayarByPenjualan($idPenjualan);
-            $sisa         = $penjualan['total_harga'] - $totalDibayar;
-            $lunas        = $sisa <= 0 ? 'lunas' : 'belum_lunas';
-            $this->penjualanModel->update($idPenjualan, [
-                'total_dibayar' => $totalDibayar,
-                'sisa_tagihan'  => max(0, $sisa),
-                'status_lunas'  => $lunas,
-                'status_lulus'  => $lunas === 'lunas' ? 'lulus' : 'proses',
-            ]);
-
-            // Jika lunas, update status mobil
-            if ($lunas === 'lunas') {
-                $pemesanan = $this->pemesananModel->find($penjualan['id_pemesanan']);
-                if ($pemesanan) {
-                    $this->mobilModel->updateStatus($pemesanan['id_mobil'], 'terjual');
-                    $this->pemesananModel->update($pemesanan['id_pemesanan'], ['status_pemesanan' => 'selesai']);
-                }
-            }
+        // AMAN: Update nominal dan pelunasan HANYA jika dana tunai (sudah sah masuk)
+        if ($metode === 'tunai') {
+            $this->syncKeuanganPenjualan($idPenjualan);
         }
 
         $msg = $metode === 'tunai'
-            ? 'Pembayaran tunai berhasil. No. Kwitansi: ' . $noKwitansi
-            : 'Bukti transfer berhasil diupload. Menunggu verifikasi admin.';
+            ? 'Pembayaran tunai berhasil diverifikasi sistem. No. Kwitansi: ' . $noKwitansi
+            : 'Bukti transfer berhasil diunggah. Menunggu proses validasi dana oleh Admin.';
 
         return redirect()->to('/pembayaran')->with('success', $msg);
     }
 
-    /** Verifikasi bukti transfer -> buat kwitansi */
+    /** Verifikasi bukti transfer oleh admin -> menerbitkan nomor kwitansi resmi */
     public function verifikasi(int $id)
     {
         $pembayaran = $this->model->find($id);
         if (!$pembayaran) {
-            return redirect()->to('/pembayaran')->with('error', 'Data tidak ditemukan.');
+            return redirect()->to('/pembayaran')->with('error', 'Data riwayat pembayaran tidak ditemukan.');
         }
 
         $noKwitansi = $this->model->generateNoKwitansi();
@@ -147,29 +130,22 @@ class Pembayaran extends Controller
             'no_kwitansi'       => $noKwitansi,
         ]);
 
-        // Update sisa tagihan penjualan
-        $idPenjualan  = $pembayaran['id_penjualan'];
-        $totalDibayar = $this->model->getTotalBayarByPenjualan($idPenjualan);
-        $penjualan    = $this->penjualanModel->find($idPenjualan);
-        if ($penjualan) {
-            $sisa  = $penjualan['total_harga'] - $totalDibayar;
-            $lunas = $sisa <= 0 ? 'lunas' : 'belum_lunas';
-            $this->penjualanModel->update($idPenjualan, [
-                'total_dibayar' => $totalDibayar,
-                'sisa_tagihan'  => max(0, $sisa),
-                'status_lunas'  => $lunas,
-                'status_lulus'  => $lunas === 'lunas' ? 'lulus' : 'proses',
-            ]);
-        }
+        // Sinkronisasi data keuangan penjualan dipicu tepat setelah transfer divalidasi sah
+        $this->syncKeuanganPenjualan($pembayaran['id_penjualan']);
 
-        return redirect()->to('/pembayaran')->with('success', 'Transfer terverifikasi. Kwitansi: ' . $noKwitansi);
+        return redirect()->to('/pembayaran')->with('success', 'Dana transfer telah divalidasi. Kwitansi resmi terbit: ' . $noKwitansi);
     }
 
-    /** Tolak bukti transfer */
+    /** Menolak berkas bukti transfer palsu / tidak valid */
     public function tolak(int $id)
     {
+        $pembayaran = $this->model->find($id);
+        if (!$pembayaran) {
+            return redirect()->to('/pembayaran')->with('error', 'Data tidak ditemukan.');
+        }
+
         $this->model->update($id, ['status_verifikasi' => 'ditolak']);
-        return redirect()->to('/pembayaran')->with('warning', 'Bukti transfer ditolak.');
+        return redirect()->to('/pembayaran')->with('warning', 'Validasi dana transfer ditolak.');
     }
 
     public function detail(int $id)
@@ -178,18 +154,58 @@ class Pembayaran extends Controller
         if (!$pembayaran) {
             return redirect()->to('/pembayaran')->with('error', 'Data tidak ditemukan.');
         }
-        return view('pembayaran/detail', ['title' => 'Detail Pembayaran', 'pembayaran' => $pembayaran]);
+        return view('pembayaran/detail', [
+            'title'      => 'Detail Pembayaran', 
+            'pembayaran' => $pembayaran
+        ]);
     }
 
-    /** Cetak Kwitansi */
+    /** Cetak Lembar Dokumen Kwitansi Showroom */
     public function cetakKwitansi(int $id)
     {
         $pembayaran = $this->model->getAllWithRelasi();
         $data       = array_filter($pembayaran, fn($p) => $p['id_pembayaran'] === $id);
         $data       = reset($data);
+        
         if (!$data || $data['status_verifikasi'] !== 'terverifikasi') {
-            return redirect()->to('/pembayaran')->with('error', 'Kwitansi tidak tersedia.');
+            return redirect()->to('/pembayaran')->with('error', 'Dokumen kwitansi tidak tersedia atau belum diverifikasi.');
         }
-        return view('pembayaran/kwitansi', ['title' => 'Cetak Kwitansi', 'pembayaran' => $data]);
+        return view('pembayaran/kwitansi', [
+            'title'      => 'Cetak Kwitansi', 
+            'pembayaran' => $data
+        ]);
+    }
+
+    /** * Kumpulan Logika Inti (Helper Terisolasi)
+     * Sinkronisasi data saldo kas masuk, kalkulasi sisa piutang, status lunas, 
+     * hingga mengubah status unit mobil di showroom secara realtime.
+     */
+    private function syncKeuanganPenjualan(int $idPenjualan): void
+    {
+        $penjualan = $this->penjualanModel->find($idPenjualan);
+        if (!$penjualan) return;
+
+        // Hanya menghitung total pembayaran yang statusnya 'terverifikasi' (Sah secara hukum kasir)
+        $totalDibayar = $this->model->getTotalBayarByPenjualan($idPenjualan);
+        $sisa         = $penjualan['total_harga'] - $totalDibayar;
+        $lunas        = $sisa <= 0 ? 'lunas' : 'belum_lunas';
+
+        // Update rekapitulasi keuangan lembar penjualan kendaraan
+        $this->penjualanModel->update($idPenjualan, [
+            'total_dibayar' => $totalDibayar,
+            'sisa_tagihan'  => max(0, $sisa),
+            'status_lunas'  => $lunas,
+            'status_lulus'  => $lunas === 'lunas' ? 'lulus' : 'proses',
+        ]);
+
+        // Mengubah status inventori mobil menjadi TERJUAL jika pelunasan klir
+        if ($lunas === 'lunas') {
+            $pemesanan = $this->pemesananModel->find($penjualan['id_pemesanan']);
+            if ($pemesanan) {
+                // Perubahan status fisik unit mobil dan penutupan dokumen pemesanan awal
+                $this->mobilModel->updateStatus($pemesanan['id_mobil'], 'terjual');
+                $this->pemesananModel->update($pemesanan['id_pemesanan'], ['status_pemesanan' => 'selesai']);
+            }
+        }
     }
 }

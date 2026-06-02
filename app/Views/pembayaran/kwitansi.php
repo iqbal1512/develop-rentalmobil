@@ -4,95 +4,92 @@
     <meta charset="UTF-8">
     <title><?= $title ?></title>
     <style>
-        body { font-family: Arial, sans-serif; font-size: 14px; }
-        .kwitansi-container { width: 800px; margin: 0 auto; border: 2px solid #000; padding: 20px; position: relative; }
+        body { font-family: 'Courier New', Courier, monospace; color: #000; padding: 20px; font-size: 13px; line-height: 1.4; }
+        .wrapper { width: 100%; max-width: 750px; margin: 0 auto; border: 2px dashed #000; padding: 25px; }
         .header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-        .header h1 { margin: 0; font-size: 24px; color: #333; }
-        .header p { margin: 5px 0 0; }
-        .no-kwitansi { text-align: right; }
-        .content table { width: 100%; border-collapse: collapse; }
-        .content table td { padding: 8px 0; vertical-align: top; }
-        .content table td:first-child { width: 25%; font-weight: bold; }
-        .content table td:nth-child(2) { width: 2%; }
-        .amount { background: #f0f0f0; padding: 10px; font-size: 18px; font-weight: bold; border: 1px solid #ccc; display: inline-block; margin-top: 20px; }
-        .signature { margin-top: 50px; text-align: right; }
-        .signature-line { margin-top: 80px; text-decoration: underline; font-weight: bold; }
+        .logo-title h2 { margin: 0; font-size: 20px; letter-spacing: 1px; }
+        .logo-title p { margin: 3px 0 0 0; font-size: 11px; }
+        .kw-number { text-align: right; }
+        .kw-number h3 { margin: 0; font-size: 18px; }
+        .content-table { width: 100%; margin-bottom: 25px; }
+        .content-table td { padding: 6px 0; vertical-align: top; }
+        .line-under { border-bottom: 1px dotted #000; font-weight: bold; }
+        .footer-sign { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; }
+        .terbilang-box { background: #eee; padding: 8px 12px; font-style: italic; font-weight: bold; font-size: 12px; display: inline-block; border: 1px solid #000; }
+        .amount-box { font-size: 18px; font-weight: bold; border: 2px solid #000; padding: 6px 15px; display: inline-block; margin-top: 10px; }
+        .sign-area { text-align: center; width: 200px; }
+        .sign-space { height: 70px; }
+        @media print { .no-print { display: none; } body { padding: 0; } .wrapper { border: none; } }
     </style>
 </head>
-<body onload="window.print()">
+<body>
 
-<div class="kwitansi-container">
+<div class="no-print" style="max-width: 750px; margin: 0 auto 15px auto; text-align: right;">
+    <button onclick="window.print();" style="padding: 6px 15px; background: #000; color: #fff; cursor: pointer; font-weight: bold;">CETAK NOTA (PRINT)</button>
+    <button onclick="window.close();" style="padding: 6px 15px; background: #666; color: #fff; cursor: pointer;">TUTUP</button>
+</div>
+
+<div class="wrapper">
     <div class="header">
+        <div class="logo-title">
+            <h2>SHOWROOM MOBIL BAROKAH</h2>
+            <p>Jl. Jend. Sudirman No. 45, Kav. B, Kota Tangerang</p>
+        </div>
+        <div class="kw-number">
+            <h3>KWITANSI RESMI</h3>
+            <p>No: <?= esc($pembayaran['no_kwitansi']) ?></p>
+        </div>
+    </div>
+
+    <table class="content-table">
+        <tr>
+            <td style="width: 180px;">Telah Diterima Dari</td>
+            <td style="width: 15px;">:</td>
+            <td class="line-under"><?= esc(strtoupper($pembayaran['nama_customer'])) ?></td>
+        </tr>
+        <tr>
+            <td>Banyaknya Uang</td>
+            <td>:</td>
+            <td class="line-under" style="font-size:12px;">
+                ### Rupiah Terlampir Pada Nominal Box Dibawah ###
+            </td>
+        </tr>
+        <tr>
+            <td>Untuk Pembayaran</td>
+            <td>:</td>
+            <td class="line-under">
+                <?= esc(str_replace('_', ' ', strtoupper($pembayaran['jenis_pembayaran']))) ?> UNIT KENDARAAN: <?= esc(strtoupper($pembayaran['nama_mobil'])) ?> (METODE: <?= esc(strtoupper($pembayaran['metode_bayar'])) ?>)
+            </td>
+        </tr>
+        <?php if(!empty($pembayaran['keterangan'])): ?>
+        <tr>
+            <td>Keterangan Memo</td>
+            <td>:</td>
+            <td style="border-bottom: 1px dotted #000; font-style: italic;"><?= esc($pembayaran['keterangan']) ?></td>
+        </tr>
+        <?php endif; ?>
+    </table>
+
+    <div class="footer-sign">
         <div>
-            <h1>AUTOPRIME SHOWROOM</h1>
-            <p>Jl. Raya Mobil No. 123, Jakarta<br>Telp: (021) 12345678</p>
+            <div class="terbilang-box">Tanggal Setor: <?= date('d/m/Y', strtotime($pembayaran['tgl_bayar'])) ?></div>
+            <br>
+            <div class="amount-box">RP. <?= number_format($pembayaran['jumlah_bayar'], 0, ',', '.') ?>,-</div>
         </div>
-        <div class="no-kwitansi">
-            <h2>KWITANSI</h2>
-            <p>No. <strong><?= $pembayaran['no_kwitansi'] ?></strong></p>
+        <div class="sign-area">
+            <p>Tangerang, <?= date('d M Y') ?></p>
+            <p>Kasir Operasional,</p>
+            <div class="sign-space"></div>
+            <p style="text-decoration: underline; font-weight: bold;">( <?= esc($pembayaran['nama_user'] ?? 'Administrator') ?> )</p>
         </div>
-    </div>
-
-    <div class="content">
-        <table>
-            <tr>
-                <td>Telah terima dari</td>
-                <td>:</td>
-                <td><?= htmlspecialchars($pembayaran['nama_customer'] ?? 'Customer') ?></td>
-            </tr>
-            <tr>
-                <td>Uang Sejumlah</td>
-                <td>:</td>
-                <td style="font-style: italic;">
-                    <?php
-                        if (!function_exists('terbilang')) {
-                            function terbilang($angka) {
-                                $angka = abs($angka);
-                                $baca = array("", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas");
-                                $terbilang = "";
-                                if ($angka < 12) {
-                                    $terbilang = " " . $baca[$angka];
-                                } else if ($angka < 20) {
-                                    $terbilang = terbilang($angka - 10) . " Belas";
-                                } else if ($angka < 100) {
-                                    $terbilang = terbilang($angka / 10) . " Puluh" . terbilang($angka % 10);
-                                } else if ($angka < 200) {
-                                    $terbilang = " Seratus" . terbilang($angka - 100);
-                                } else if ($angka < 1000) {
-                                    $terbilang = terbilang($angka / 100) . " Ratus" . terbilang($angka % 100);
-                                } else if ($angka < 2000) {
-                                    $terbilang = " Seribu" . terbilang($angka - 1000);
-                                } else if ($angka < 1000000) {
-                                    $terbilang = terbilang($angka / 1000) . " Ribu" . terbilang($angka % 1000);
-                                } else if ($angka < 1000000000) {
-                                    $terbilang = terbilang($angka / 1000000) . " Juta" . terbilang($angka % 1000000);
-                                }
-                                return $terbilang;
-                            }
-                        }
-                        echo terbilang($pembayaran['jumlah_bayar']) . " Rupiah";
-                    ?>
-                </td>
-            </tr>
-            <tr>
-                <td>Untuk Pembayaran</td>
-                <td>:</td>
-                <td><?= strtoupper(str_replace('_', ' ', $pembayaran['jenis_pembayaran'])) ?> Pembelian Mobil 
-                    <?= htmlspecialchars($pembayaran['nama_mobil'] ?? '') ?>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="amount">
-        Terbilang: Rp <?= number_format($pembayaran['jumlah_bayar'], 0, ',', '.') ?>
-    </div>
-
-    <div class="signature">
-        Jakarta, <?= date('d F Y', strtotime($pembayaran['tgl_bayar'])) ?><br><br><br><br>
-        <div class="signature-line">( <?= session()->get('nama') ?? 'Finance/Kasir' ?> )</div>
     </div>
 </div>
 
+<script>
+    // Otomatis mentrigger dialog printer saat dokumen kwitansi selesai diload browser
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => { window.print(); }, 500);
+    });
+</script>
 </body>
 </html>

@@ -5,12 +5,13 @@ namespace App\Models;
 use CodeIgniter\Model;
 
 /**
- * PembayaranModel
+ * PembayaranPenjualanModel
+ * Mengelola arus kas masuk (pembayaran dari customer atas unit kendaraan)
  * Sinkron dengan Database: db_showroom_mobil
  */
-class PembayaranModel extends Model
+class PembayaranPenjualanModel extends Model
 {
-    protected $table            = 'pembayaran';
+    protected $table            = 'pembayaran'; // Tetap menggunakan tabel pembayaran utama
     protected $primaryKey       = 'id_pembayaran';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
@@ -21,13 +22,13 @@ class PembayaranModel extends Model
         'no_kwitansi', 'status_verifikasi', 'keterangan'
     ];
 
-    // Dates
+    // Format Waktu
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 
     /**
-     * Ambil semua pembayaran beserta relasi
+     * Ambil semua data pembayaran masuk beserta relasi data customer dan unit mobil
      */
     public function getAllWithRelasi(): array
     {
@@ -44,7 +45,7 @@ class PembayaranModel extends Model
     }
 
     /**
-     * Pembayaran menunggu verifikasi (khusus metode transfer)
+     * Mengambil daftar pembayaran yang menunggu validasi admin (Khusus transfer bank)
      */
     public function getMenungguVerifikasi(): array
     {
@@ -58,24 +59,25 @@ class PembayaranModel extends Model
     }
 
     /**
-     * Total bayar per penjualan (untuk pengecekan pelunasan)
+     * Menghitung total dana masuk yang sah (Terverifikasi) per lembar penjualan
+     * PERBAIKAN LOGIKA: Uang yang berstatus 'menunggu' verifikasi transfer 
+     * TIDAK BOLEH ikut terjumlah sebagai saldo pelunasan.
      */
     public function getTotalBayarByPenjualan(int $idPenjualan): float
     {
         $result = $this->selectSum('jumlah_bayar')
                        ->where('id_penjualan', $idPenjualan)
-                       ->where('status_verifikasi !=', 'ditolak')
+                       ->where('status_verifikasi', 'terverifikasi') // HANYA hitung dana yang sudah sah/klir
                        ->first();
         
         return (float)($result['jumlah_bayar'] ?? 0);
     }
 
     /**
-     * Otomatis Generate nomor kwitansi unik
+     * Otomatis membuat format nomor kwitansi unik showroom (Contoh: KWT-20260602-0001)
      */
     public function generateNoKwitansi(): string
     {
-        // Mencari ID terakhir untuk penomoran urut
         $builder = $this->db->table($this->table);
         $last = $builder->selectMax('id_pembayaran')->get()->getRowArray();
         
@@ -84,7 +86,7 @@ class PembayaranModel extends Model
     }
 
     /**
-     * Filter laporan pembayaran berdasarkan rentang tanggal
+     * Filter data transaksi kas masuk untuk keperluan cetak laporan omset berkala
      */
     public function getLaporan(string $tglMulai, string $tglAkhir): array
     {
@@ -94,6 +96,7 @@ class PembayaranModel extends Model
                     ->join('mobil',     'mobil.id_mobil = pemesanan.id_mobil',              'left')
                     ->where('pembayaran.tgl_bayar >=', $tglMulai)
                     ->where('pembayaran.tgl_bayar <=', $tglAkhir)
+                    ->where('pembayaran.status_verifikasi', 'terverifikasi') // Laporan hanya mencatat uang riil yang sah
                     ->orderBy('pembayaran.tgl_bayar', 'ASC')
                     ->findAll();
     }

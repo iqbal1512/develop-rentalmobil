@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 /**
  * PemesananModel - Booking mobil dari customer
- * Sinkron dengan Database: db_showroom_mobil
+ * Sinkron dengan Database terupdate: db_showroom_mobil
  */
 class PemesananModel extends Model
 {
@@ -15,13 +15,21 @@ class PemesananModel extends Model
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
+    
+    // Field di bawah ini disesuaikan 100% dengan struktur tabel terbaru kamu
     protected $allowedFields    = [
-        'id_customer', 'id_mobil', 'id_user', 'tgl_pesan', 'tgl_jatuh_tempo',
-        'biaya_bukti_pesan', 'harga_jual', 'harga_jual_jadi', 'dp_persen',
-        'nominal_dp', 'dp_awal_dibayar', 'sisa_dp_internal',
-        'ktp_diterima', 'status_pemesanan', 'catatan'
+        'id_customer', 
+        'id_mobil', 
+        'id_user', 
+        'tgl_pesan', 
+        'tgl_jatuh_tempo',
+        'harga_jadi', 
+        'nilai_tanda_jadi', 
+        'nilai_dp_minimal', 
+        'status_pemesanan'
     ];
 
+    // Aktifkan timestamp jika kamu menggunakan kolom created_at & updated_at
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -32,11 +40,9 @@ class PemesananModel extends Model
     public function getAllWithRelasi(): array
     {
         return $this->select('pemesanan.*, customer.nama as nama_customer, customer.no_ktp,
-                              mobil.nama_mobil, mobil.tipe, mobil.warna, mobil.no_polisi,
-                              users.nama as nama_user')
+                              mobil.nama_mobil, mobil.tipe, mobil.warna, mobil.no_polisi')
                     ->join('customer', 'customer.id_customer = pemesanan.id_customer', 'left')
                     ->join('mobil',    'mobil.id_mobil = pemesanan.id_mobil',           'left')
-                    ->join('users',    'users.id_user = pemesanan.id_user',             'left')
                     ->orderBy('pemesanan.tgl_pesan', 'DESC')
                     ->findAll();
     }
@@ -48,13 +54,19 @@ class PemesananModel extends Model
     {
         return $this->select('pemesanan.*, customer.nama as nama_customer, customer.alamat as alamat_customer,
                               customer.telepon, customer.no_ktp,
-                              mobil.nama_mobil, mobil.tipe, mobil.warna, mobil.no_polisi, mobil.tahun,
-                              users.nama as nama_user')
+                              mobil.nama_mobil, mobil.merek, mobil.tipe, mobil.warna, mobil.no_polisi, mobil.tahun, mobil.harga_jual')
                     ->join('customer', 'customer.id_customer = pemesanan.id_customer', 'left')
                     ->join('mobil',    'mobil.id_mobil = pemesanan.id_mobil',           'left')
-                    ->join('users',    'users.id_user = pemesanan.id_user',             'left')
                     ->where('pemesanan.id_pemesanan', $id)
                     ->first();
+    }
+
+    /**
+     * ALIAS METHOD: Menjaga kompatibilitas panggilan di Controller Penjualan & Pemesanan
+     */
+    public function getDetailInvoice(int $id): array|null
+    {
+        return $this->getDetailWithRelasi($id);
     }
 
     /**
@@ -66,8 +78,7 @@ class PemesananModel extends Model
     }
 
     /**
-     * Batal otomatis jika melewati jatuh tempo (Update sekaligus)
-     * Digunakan di Dashboard Controller
+     * Batal otomatis jika melewati jatuh tempo (Update status booking & rilis kembali unit mobil)
      */
     public function batalOtomatisTempo(): int
     {
@@ -79,10 +90,18 @@ class PemesananModel extends Model
         if (empty($expired)) return 0;
 
         $ids = array_column($expired, 'id_pemesanan');
+        $idMobils = array_column($expired, 'id_mobil');
         
-        // Update status menjadi batal secara massal
+        // 1. Update status pemesanan menjadi dibatalkan secara massal
         $this->builder()->whereIn('id_pemesanan', $ids)
-                        ->update(['status_pemesanan' => 'batal']);
+                        ->update(['status_pemesanan' => 'dibatalkan']);
+        
+        // 2. Rilis kembali status unit mobil terkait menjadi 'tersedia' agar showroom tidak merugi
+        if (!empty($idMobils)) {
+            $db = \Config\Database::connect();
+            $db->table('mobil')->whereIn('id_mobil', $idMobils)
+                               ->update(['status_jual' => 'tersedia']);
+        }
         
         return count($ids);
     }

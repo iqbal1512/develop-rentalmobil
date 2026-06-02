@@ -30,7 +30,8 @@ class PenjualanModel extends Model
      */
     public function getAllWithRelasi(): array
     {
-        return $this->select('penjualan.*, pemesanan.tgl_pesan, pemesanan.harga_jual_jadi,
+        // PERBAIKAN: Mengubah pemesanan.harga_jual_jadi menjadi pemesanan.harga_jadi
+        return $this->select('penjualan.*, pemesanan.tgl_pesan, pemesanan.harga_jadi,
                               customer.nama as nama_customer, customer.telepon,
                               mobil.nama_mobil, mobil.tipe, mobil.warna, mobil.no_polisi,
                               users.nama as nama_user')
@@ -47,8 +48,8 @@ class PenjualanModel extends Model
      */
     public function getDetailWithRelasi(int $id): array|null
     {
-        return $this->select('penjualan.*, pemesanan.tgl_pesan, pemesanan.harga_jual_jadi,
-                              pemesanan.nominal_dp, pemesanan.dp_awal_dibayar, pemesanan.biaya_bukti_pesan,
+        // PERBAIKAN: Sinkronisasi field pemesanan agar sesuai dengan kolom harga_jadi dan nilai_tanda_jadi
+        return $this->select('penjualan.*, pemesanan.tgl_pesan, pemesanan.harga_jadi, pemesanan.nilai_tanda_jadi,
                               customer.nama as nama_customer, customer.alamat as alamat_customer,
                               customer.telepon, customer.no_ktp,
                               mobil.nama_mobil, mobil.tipe, mobil.warna, mobil.no_polisi, mobil.tahun,
@@ -69,14 +70,13 @@ class PenjualanModel extends Model
         $result = $this->selectSum('total_harga')
                        ->where('MONTH(tgl_penjualan)', date('m'))
                        ->where('YEAR(tgl_penjualan)', date('Y'))
-                       ->first(); // Perbaikan: Gunakan first() untuk CI4 Model
+                       ->first();
         
         return (float)($result['total_harga'] ?? 0);
     }
 
     /**
      * Data Grafik Penjualan 6 Bulan Terakhir
-     * Method ini wajib ada agar Dashboard tidak Error
      */
     public function getChartData6Bulan(): array
     {
