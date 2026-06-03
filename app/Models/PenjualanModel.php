@@ -4,10 +4,6 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-/**
- * PenjualanModel
- * Sinkron dengan Database: db_showroom_mobil
- */
 class PenjualanModel extends Model
 {
     protected $table            = 'penjualan';
@@ -15,10 +11,21 @@ class PenjualanModel extends Model
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
+
+    // Field wajib terdaftar agar proses insert/update otomatis berjalan
     protected $allowedFields    = [
-        'id_pemesanan', 'id_user', 'tgl_penjualan', 'total_harga',
-        'total_dibayar', 'sisa_tagihan', 'status_lulus', 'status_lunas',
-        'proses_stnk', 'proses_bpkb', 'catatan'
+        'id_pemesanan', 
+        'id_user', 
+        'tgl_penjualan', 
+        'total_harga', 
+        'total_tagihan', 
+        'total_dibayar', 
+        'sisa_tagihan', 
+        'status_lulus', 
+        'status_lunas', 
+        'proses_stnk', 
+        'proses_bpkb', 
+        'catatan'
     ];
     
     protected $useTimestamps = true;
@@ -26,15 +33,13 @@ class PenjualanModel extends Model
     protected $updatedField  = 'updated_at';
 
     /**
-     * Ambil semua penjualan beserta relasi lengkap
+     * Ambil semua penjualan beserta relasi lengkap (untuk halaman utama Penjualan)
      */
     public function getAllWithRelasi(): array
     {
-        // PERBAIKAN: Mengubah pemesanan.harga_jual_jadi menjadi pemesanan.harga_jadi
-        return $this->select('penjualan.*, pemesanan.tgl_pesan, pemesanan.harga_jadi,
+        return $this->select('penjualan.*, pemesanan.tgl_pesan, 
                               customer.nama as nama_customer, customer.telepon,
-                              mobil.nama_mobil, mobil.tipe, mobil.warna, mobil.no_polisi,
-                              users.nama as nama_user')
+                              mobil.nama_mobil, mobil.tipe, users.nama as nama_user')
                     ->join('pemesanan', 'pemesanan.id_pemesanan = penjualan.id_pemesanan', 'left')
                     ->join('customer',  'customer.id_customer = pemesanan.id_customer',    'left')
                     ->join('mobil',     'mobil.id_mobil = pemesanan.id_mobil',             'left')
@@ -44,16 +49,13 @@ class PenjualanModel extends Model
     }
 
     /**
-     * Detail penjualan untuk cetak nota/laporan
+     * Detail penjualan untuk keperluan cetak/detail (singgle record)
      */
     public function getDetailWithRelasi(int $id): array|null
     {
-        // PERBAIKAN: Sinkronisasi field pemesanan agar sesuai dengan kolom harga_jadi dan nilai_tanda_jadi
-        return $this->select('penjualan.*, pemesanan.tgl_pesan, pemesanan.harga_jadi, pemesanan.nilai_tanda_jadi,
-                              customer.nama as nama_customer, customer.alamat as alamat_customer,
-                              customer.telepon, customer.no_ktp,
-                              mobil.nama_mobil, mobil.tipe, mobil.warna, mobil.no_polisi, mobil.tahun,
-                              users.nama as nama_user')
+        return $this->select('penjualan.*, pemesanan.harga_jadi, 
+                              customer.nama as nama_customer, customer.alamat,
+                              mobil.nama_mobil, mobil.no_polisi, users.nama as nama_user')
                     ->join('pemesanan', 'pemesanan.id_pemesanan = penjualan.id_pemesanan', 'left')
                     ->join('customer',  'customer.id_customer = pemesanan.id_customer',    'left')
                     ->join('mobil',     'mobil.id_mobil = pemesanan.id_mobil',             'left')
@@ -63,46 +65,15 @@ class PenjualanModel extends Model
     }
 
     /**
-     * Total pendapatan bulan ini (Berdasarkan total_harga di DB kamu)
-     */
-    /**
-     * Total pendapatan bulan ini 
-     * PERBAIKAN: Mengganti total_harga menjadi total_tagihan sesuai database
+     * Total pendapatan berdasarkan total_tagihan (pastikan kolom ini ada di DB)
      */
     public function totalPendapatanBulanIni(): float
     {
-        // Ganti 'total_harga' menjadi 'total_tagihan'
         $result = $this->selectSum('total_tagihan', 'total_pendapatan')
                        ->where('MONTH(tgl_penjualan)', date('m'))
                        ->where('YEAR(tgl_penjualan)', date('Y'))
                        ->first();
         
         return (float)($result['total_pendapatan'] ?? 0);
-    }
-    /**
-     * Data Grafik Penjualan 6 Bulan Terakhir
-     */
-    public function getChartData6Bulan(): array
-    {
-        return $this->select("DATE_FORMAT(tgl_penjualan, '%b') as bulan_label, COUNT(*) as total")
-                    ->groupBy('MONTH(tgl_penjualan)')
-                    ->orderBy('tgl_penjualan', 'ASC')
-                    ->limit(6)
-                    ->get()->getResultArray();
-    }
-
-    /**
-     * Laporan penjualan per periode
-     */
-    public function getLaporan(string $tglMulai, string $tglAkhir): array
-    {
-        return $this->select('penjualan.*, customer.nama as nama_customer, mobil.nama_mobil')
-                    ->join('pemesanan', 'pemesanan.id_pemesanan = penjualan.id_pemesanan', 'left')
-                    ->join('customer',  'customer.id_customer = pemesanan.id_customer',    'left')
-                    ->join('mobil',     'mobil.id_mobil = pemesanan.id_mobil',             'left')
-                    ->where('tgl_penjualan >=', $tglMulai)
-                    ->where('tgl_penjualan <=', $tglAkhir)
-                    ->orderBy('penjualan.tgl_penjualan', 'ASC')
-                    ->findAll();
     }
 }

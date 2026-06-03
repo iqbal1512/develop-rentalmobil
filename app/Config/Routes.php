@@ -108,7 +108,9 @@ $routes->group('penjualan', ['filter' => 'auth'], function ($routes) {
 // =============================================
 $routes->group('pembayaran', ['filter' => 'auth'], function ($routes) {
     $routes->get('/',                        'Pembayaran::index');
-    $routes->get('create/(:num)',            'Pembayaran::create/$1');
+    // Ganti baris $routes->get('create/(:num)', ...) menjadi:
+$routes->get('create', 'Pembayaran::create');
+
     $routes->post('store',                   'Pembayaran::store');
     $routes->get('verifikasi/(:num)',        'Pembayaran::verifikasi/$1');
     $routes->get('tolak/(:num)',             'Pembayaran::tolak/$1');

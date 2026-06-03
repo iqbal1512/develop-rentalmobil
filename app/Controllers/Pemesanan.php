@@ -55,8 +55,7 @@ class Pemesanan extends Controller
             'mobils'    => $mobils,
         ]);
     }
-
-    public function store()
+public function store()
     {
         $rules = [
             'id_customer'     => 'required|integer',
@@ -77,6 +76,7 @@ class Pemesanan extends Controller
         $tglPesan       = $this->request->getPost('tgl_pesan');
         $tglJatuhTempo  = date('Y-m-d', strtotime($tglPesan . ' +7 days'));
 
+        // --- PROSES INSERT PEMESANAN ---
         $this->model->insert([
             'id_customer'      => $this->request->getPost('id_customer'),
             'id_mobil'         => $this->request->getPost('id_mobil'),
@@ -89,12 +89,19 @@ class Pemesanan extends Controller
             'status_pemesanan' => 'menunggu',
         ]);
 
+        // --- TAMBAHAN LOGIKA DI BAWAH INI ---
+        
+        // 1. Ambil ID dari data yang baru saja masuk ke database
+        $idPemesananBaru = $this->model->getInsertID();
+
+        // 2. Update status mobil jadi 'dipesan'
         $this->mobilModel->update($this->request->getPost('id_mobil'), ['status_jual' => 'dipesan']);
 
-        $nominalDpInfo = ($nilaiDpMinimal / 100) * $hargaJadi;
-
-        return redirect()->to('/pemesanan')->with('success', 
-            "Pemesanan berhasil disimpan. Status: Menunggu Pembayaran. Batas Jatuh Tempo: " . date('d-m-Y', strtotime($tglJatuhTempo)) . ". Estimasi nilai DP 30%: Rp " . number_format($nominalDpInfo, 0, ',', '.'));
+        // 3. Langsung arahkan ke halaman tambah pembayaran sambil membawa ID
+        return redirect()->to('/pembayaran/create?id_pemesanan=' . $idPemesananBaru)
+                         ->with('success', 'Pemesanan berhasil! Silakan masukkan detail pembayaran.');
+        
+        // --- SELESAI TAMBAHAN ---
     }
 
     public function edit(int $id)

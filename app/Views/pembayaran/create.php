@@ -35,7 +35,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Metode Pembayaran</label>
-                            <select name="metode_bayar" id="metodeBayar" class="form-select border-secondary" required>
+                            <select name="metode_pembayaran" id="metodeBayar" class="form-select border-secondary" required>
                                 <option value="tunai">Cash / Tunai di Kasir</option>
                                 <option value="transfer">Transfer Bank (Perlu Verifikasi)</option>
                             </select>

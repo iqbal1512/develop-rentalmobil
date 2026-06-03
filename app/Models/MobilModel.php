@@ -74,4 +74,12 @@ class MobilModel extends Model
                     ->orderBy('nama_mobil', 'ASC')
                     ->findAll();
     }
+
+    /**
+     * Memperbarui status unit mobil (tersedia/dipesan/terjual)
+     */
+    public function updateStatus(int $idMobil, string $status): bool
+    {
+        return $this->update($idMobil, ['status_jual' => $status]);
+    }
 }
